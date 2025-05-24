@@ -32,7 +32,7 @@ const Estimator = ({ title, description, images, onEstimate }) => {
                     messages: [
                         {
                             role: 'system',
-                            content: 'You are an expert at estimating the condition and fair price of items in a student marketplace. Analyze the item details and suggest a condition (new, like-new, good, fair, poor) and a fair price in USD. Return only JSON in this format: {"condition": "condition-here", "price": number-here}'
+                            content: 'You are an expert at estimating the condition and fair price of items in a student marketplace. Analyze the item details and suggest a condition (new, like-new, good, fair, poor) and a fair price in BDT. Return only JSON in this format: {"condition": "condition-here", "price": number-here}'
                         },
                         {
                             role: 'user',
