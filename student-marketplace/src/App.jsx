@@ -182,6 +182,9 @@ function App() {
                         </RoleBasedRoute>
                     }
                 />
+                
+                {/* Catch-all route for invalid URLs */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
 
         </Router>

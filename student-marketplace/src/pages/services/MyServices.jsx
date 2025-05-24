@@ -64,10 +64,8 @@ const MyServices = () => {
                 {services.length === 0 ? (
                     <div className="no-services">You have no active services.</div>
                 ) : (
-                    services.map(service => (
-                        <div key={service.id} className="service-card">
-                            <div className="service-image">
-                                <img src={service.profileImage || '/default-service.jpg'} alt={service.title} />
+                    services.map(service => (                        <div key={service.id} className="service-card">                            <div className="service-image">
+                                <img src={service.providerImage || '/default-service.svg'} alt={service.title} />
                             </div>
                             <div className="service-details">
                                 <h3>{service.title}</h3>

@@ -118,9 +118,8 @@ const ServiceDetail = () => {
                     </div>
                 </div>
 
-                <div className="service-main">
-                    <div className="service-image">
-                        <img src={service.profileImage || '/default-service.jpg'} alt={service.title} />
+                <div className="service-main">                    <div className="service-image">
+                        <img src={service.providerImage || '/default-service.svg'} alt={service.title} />
                     </div>
 
                     <div className="service-info">
@@ -160,11 +159,7 @@ const ServiceDetail = () => {
 
                 <div className="provider-section">
                     <div className="provider-info">
-                        <img 
-                            src={service.providerImage || '/default-avatar.png'} 
-                            alt={service.providerName} 
-                            className="provider-avatar"
-                        />
+                        
                         <div className="provider-details">
                             <h3>{service.providerName}</h3>
                             <div className="provider-rating">

@@ -25,19 +25,24 @@ const MapController = ({ position }) => {
     return null;
 };
 
-const LocationMarker = ({ position, setPosition, selectedLocations, setSelectedLocations }) => {
+const LocationMarker = ({ position, setPosition, selectedLocations, setSelectedLocations, singleLocationMode }) => {
     useMapEvents({
         click(e) {
             const newLocation = [e.latlng.lat, e.latlng.lng];
             setPosition(newLocation);
             
-            // Add new location to selected locations if not already present
-            const locationExists = selectedLocations.some(
-                loc => loc[0] === newLocation[0] && loc[1] === newLocation[1]
-            );
-            
-            if (!locationExists) {
-                setSelectedLocations([...selectedLocations, newLocation]);
+            if (singleLocationMode) {
+                // In single location mode, replace the existing location
+                setSelectedLocations([newLocation]);
+            } else {
+                // Add new location to selected locations if not already present
+                const locationExists = selectedLocations.some(
+                    loc => loc[0] === newLocation[0] && loc[1] === newLocation[1]
+                );
+                
+                if (!locationExists) {
+                    setSelectedLocations([...selectedLocations, newLocation]);
+                }
             }
         },
     });
@@ -45,7 +50,7 @@ const LocationMarker = ({ position, setPosition, selectedLocations, setSelectedL
     return null;
 };
 
-const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations = [] }) => {
+const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations = [], singleLocationMode = false }) => {
     const [position, setPosition] = useState(null);
     const [selectedLocations, setSelectedLocations] = useState(initialLocations);
     const [loading, setLoading] = useState(true);
@@ -73,10 +78,9 @@ const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations =
 
     const handleLocationRemove = (index) => {
         setSelectedLocations(selectedLocations.filter((_, i) => i !== index));
-    };
-
-    const handleConfirm = () => {
-        if (selectedLocations.length >= 2) {
+    };    const handleConfirm = () => {
+        const minLocations = singleLocationMode ? 1 : 2;
+        if (selectedLocations.length >= minLocations) {
             onLocationsSelect(selectedLocations.map(loc => ({
                 lat: loc[0],
                 lng: loc[1],
@@ -91,9 +95,8 @@ const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations =
 
     return (
         <div className="location-modal-overlay">
-            <div className="location-modal">
-                <div className="location-modal-header">
-                    <h3>Select Meeting Locations</h3>
+            <div className="location-modal">                <div className="location-modal-header">
+                    <h3>{singleLocationMode ? 'Select Counter-Proposal Location' : 'Select Meeting Locations'}</h3>
                     <button className="close-button" onClick={onClose}>×</button>
                 </div>
                 
@@ -108,12 +111,12 @@ const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations =
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             />
-                            <MapController position={position} />
-                            <LocationMarker
+                            <MapController position={position} />                            <LocationMarker
                                 position={position}
                                 setPosition={setPosition}
                                 selectedLocations={selectedLocations}
                                 setSelectedLocations={setSelectedLocations}
+                                singleLocationMode={singleLocationMode}
                             />
                             {selectedLocations.map((loc, index) => (
                                 <Marker
@@ -125,10 +128,8 @@ const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations =
                                 />
                             ))}
                         </MapContainer>
-                    </div>
-
-                    <div className="selected-locations">
-                        <h4>Selected Locations ({selectedLocations.length}/2 minimum)</h4>
+                    </div>                    <div className="selected-locations">
+                        <h4>Selected Locations ({selectedLocations.length}/{singleLocationMode ? '1' : '2 minimum'})</h4>
                         <div className="location-list">
                             {selectedLocations.map((loc, index) => (
                                 <div key={index} className="location-item">
@@ -143,15 +144,13 @@ const LocationSelectionModal = ({ onClose, onLocationsSelect, initialLocations =
                             ))}
                         </div>
                     </div>
-                </div>
-
-                <div className="location-modal-footer">
+                </div>                <div className="location-modal-footer">
                     <button
                         className="confirm-locations-btn"
                         onClick={handleConfirm}
-                        disabled={selectedLocations.length < 2}
+                        disabled={selectedLocations.length < (singleLocationMode ? 1 : 2)}
                     >
-                        Confirm Locations
+                        {singleLocationMode ? 'Send Counter-Proposal' : 'Confirm Locations'}
                     </button>
                 </div>
             </div>
