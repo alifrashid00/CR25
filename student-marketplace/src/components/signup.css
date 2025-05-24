@@ -32,7 +32,8 @@
     font-weight: 500;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -40,9 +41,15 @@
     transition: border-color 0.3s ease;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     outline: none;
     border-color: #007cf0;
+}
+
+.form-group select {
+    background-color: white;
+    cursor: pointer;
 }
 
 .error {

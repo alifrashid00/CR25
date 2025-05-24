@@ -16,7 +16,9 @@ const SignUp = () => {
         role: "student",
     });
     const [error, setError] = useState("");
-    const navigate = useNavigate();    const handleChange = (e) => {
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -31,7 +33,8 @@ const SignUp = () => {
         try {
             const auth = getAuth();
             const { email, password, ...userData } = formData;
-              // Create user with email and password
+            
+            // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             
             // Store additional user data in Firestore using email as document ID
@@ -53,7 +56,8 @@ const SignUp = () => {
     return (
         <div className="signup-container">
             <h2>Sign Up</h2>
-            {error && <p className="error">{error}</p>}            <form onSubmit={handleSubmit} className="signup-form">
+            {error && <p className="error">{error}</p>}
+            <form onSubmit={handleSubmit} className="signup-form">
                 <div className="form-group">
                     <label htmlFor="firstName">First Name</label>
                     <input
@@ -127,8 +131,19 @@ const SignUp = () => {
                     />
                 </div>
 
-
-                
+                <div className="form-group">
+                    <label htmlFor="role">Role</label>
+                    <select
+                        id="role"
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="student">Student</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
 
                 <button type="submit">Sign Up</button>
                 

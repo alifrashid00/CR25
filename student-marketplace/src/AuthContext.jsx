@@ -6,8 +6,6 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
-import { db } from "./firebase";
-import { doc, getDoc } from "firebase/firestore";
 
 
 const AuthContext = createContext();
@@ -48,21 +46,7 @@ export function AuthProvider({ children }) {    const [user, setUser] = useState
     }, []);
 
 
-//     useEffect(() => {
-//     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-//         setLoading(true);
-//         if (currentUser) {
-//             const userDoc = await getDoc(doc(db, "users", currentUser.email));
-//             const role = userDoc.exists() ? userDoc.data().role : null;
-//             setUser({ ...currentUser, role });
-//         } else {
-//             setUser(null);
-//         }
-//         setLoading(false);
-//     });
 
-//     return () => unsubscribe();
-// }, []);
 
     const value = {
         user,
