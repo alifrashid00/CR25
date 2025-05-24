@@ -1,0 +1,39 @@
+.listing-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-button, .sell-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.filter-button {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.filter-button:hover {
+    background-color: #e0e0e0;
+}
+
+.sell-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.sell-button:hover {
+    background-color: #45a049;
+}
