@@ -1,155 +1,147 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { db } from "../firebase";
 import {
     collection,
+    doc,
+    getDoc,
+    setDoc,
     addDoc,
     onSnapshot,
     query,
     where,
     orderBy,
-    doc,
-    getDoc,
-    getDocs,
+    updateDoc,
     serverTimestamp,
-    updateDoc
 } from "firebase/firestore";
-import "./ChatModal.css"; // Import the custom CSS
+import "./ChatModal.css";
 
+// Deterministic conversation ID
+const getConversationId = (buyerId, sellerId, listingId) =>
+    [buyerId, sellerId, listingId].sort().join("_");
 
-const ChatModal = ({ listing, currentUser, onClose }) => {
+export default function ChatModal({ listing, currentUser, onClose }) {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [conversationId, setConversationId] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSending, setIsSending] = useState(false);
-    const [sellerData, setSellerData] = useState(null);
+    const [sellerInfo, setSellerInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const messagesEndRef = useRef(null);
 
+    // Improved scroll behavior with debounce
     const scrollToBottom = () => {
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 0);
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
-        scrollToBottom();
+        if (messages.length > 0) {
+            scrollToBottom();
+        }
     }, [messages]);
 
     useEffect(() => {
-        const fetchOrCreateConversation = async () => {
-            try {
-                const conversationsRef = collection(db, "conversations");
-                const q = query(
-                    conversationsRef,
-                    where("listingId", "==", listing.id),
-                    where("buyerId", "==", currentUser.id),
-                    where("sellerId", "==", listing.sellerId)
-                );
+        if (!currentUser?.id || !listing?.id || !listing?.userId) return;
 
-                const sellerRef = doc(db, "users", listing.sellerId);
+        const cid = getConversationId(currentUser.id, listing.userId, listing.id);
+        setConversationId(cid);
+
+        const initConversation = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                // Load seller info first
+                const sellerRef = doc(db, "users", listing.userId);
                 const sellerSnap = await getDoc(sellerRef);
                 if (sellerSnap.exists()) {
-                    setSellerData(sellerSnap.data());
+                    setSellerInfo(sellerSnap.data());
                 }
 
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const conversationDoc = querySnapshot.docs[0];
-                    setConversationId(conversationDoc.id);
-                    loadMessages(conversationDoc.id);
-                } else {
-                    const newConversation = {
+                // Initialize or get conversation
+                const convoRef = doc(db, "conversations", cid);
+                const convoSnap = await getDoc(convoRef);
+
+                if (!convoSnap.exists()) {
+                    await setDoc(convoRef, {
                         listingId: listing.id,
                         buyerId: currentUser.id,
-                        sellerId: listing.sellerId,
+                        sellerId: listing.userId,
+                        listingTitle: listing.title,
+                        listingImage: listing.images?.[0] || "",
                         createdAt: serverTimestamp(),
                         updatedAt: serverTimestamp(),
-                        listingTitle: listing.title,
-                        listingImage: listing.images[0]
-                    };
-                    const docRef = await addDoc(conversationsRef, newConversation);
-                    setConversationId(docRef.id);
-                    loadMessages(docRef.id);
+                        lastMessage: "",
+                    });
                 }
-            } catch (error) {
-                console.error("Error handling conversation:", error);
-                setIsLoading(false);
+
+                // Set up real-time message listener
+                const messagesQuery = query(
+                    collection(db, "messages"),
+                    where("conversationId", "==", cid),
+                    orderBy("timestamp", "asc")
+                );
+
+                const unsubscribe = onSnapshot(
+                    messagesQuery,
+                    (snapshot) => {
+                        const msgs = snapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            ...doc.data(),
+                            // Convert Firestore timestamp to Date if it exists
+                            timestamp: doc.data().timestamp?.toDate?.() || null,
+                        }));
+                        setMessages(msgs);
+                        setLoading(false);
+                    },
+                    (err) => {
+                        console.error("Message listener error:", err);
+                        setError("Failed to load messages. Please try again.");
+                        setLoading(false);
+                    }
+                );
+
+                return () => unsubscribe(); // Cleanup on unmount
+            } catch (e) {
+                console.error("Failed to load chat:", e);
+                setError("Failed to initialize chat. Please try again.");
+                setLoading(false);
             }
         };
 
-        fetchOrCreateConversation();
+        initConversation();
+
+        return () => {
+            // Cleanup when component unmounts
+            setMessages([]);
+            setLoading(true);
+        };
     }, [listing, currentUser]);
 
-    const loadMessages = (conversationId) => {
-        const messagesRef = collection(db, "messages");
-        const q = query(
-            messagesRef,
-            where("conversationId", "==", conversationId),
-            orderBy("timestamp", "asc")
-        );
+    const sendMessage = async () => {
+        if (!newMessage.trim() || !conversationId) return;
 
-        return onSnapshot(q, (snapshot) => {
-            const msgs = [];
-            snapshot.forEach((doc) => {
-                msgs.push({ id: doc.id, ...doc.data() });
-            });
-            setMessages(msgs);
-            setIsLoading(false);
-
-            if (msgs.length > 0 && msgs[msgs.length - 1].senderId !== currentUser.id) {
-                updateDoc(doc(db, "conversations", conversationId), {
-                    lastRead: serverTimestamp()
-                });
-            }
-        });
-    };
-
-    const handleSendMessage = async () => {
-        if (newMessage.trim() === "" || isSending) return;
-
-        setIsSending(true);
         try {
+            setNewMessage(""); // Optimistic update
+
+            // Add new message
             await addDoc(collection(db, "messages"), {
                 conversationId,
                 senderId: currentUser.id,
-                content: newMessage,
+                content: newMessage.trim(),
                 timestamp: serverTimestamp(),
-                read: false
+                read: false,
             });
 
+            // Update conversation
             await updateDoc(doc(db, "conversations", conversationId), {
+                lastMessage: newMessage.trim(),
                 updatedAt: serverTimestamp(),
-                lastMessage: newMessage
             });
 
-            setNewMessage("");
-        } catch (error) {
-            console.error("Error sending message:", error);
-        } finally {
-            setIsSending(false);
-        }
-    };
-
-    const suggestMeetup = async () => {
-        const defaultLocation = `${listing.university} Campus Center`;
-
-        try {
-            await addDoc(collection(db, "messages"), {
-                conversationId,
-                senderId: currentUser.id,
-                content: `Let's meet at ${defaultLocation} for the exchange. Does this work for you?`,
-                isMeetupSuggestion: true,
-                suggestedLocation: defaultLocation,
-                timestamp: serverTimestamp(),
-                read: false
-            });
-
-            await updateDoc(doc(db, "conversations", conversationId), {
-                updatedAt: serverTimestamp(),
-                lastMessage: "[Meetup Suggestion]"
-            });
-        } catch (error) {
-            console.error("Error sending meetup suggestion:", error);
+        } catch (err) {
+            console.error("Send failed:", err);
+            setError("Failed to send message. Please try again.");
+            setNewMessage(newMessage); // Revert if failed
         }
     };
 
@@ -159,23 +151,30 @@ const ChatModal = ({ listing, currentUser, onClose }) => {
                 <div className="chat-header">
                     <div className="chat-seller">
                         <img
-                            src={sellerData?.photoURL || "/default-avatar.png"}
-                            alt="Seller"
+                            src={
+                                sellerInfo?.profilePic
+                                    ? sellerInfo.profilePic  // Use the base64 image directly
+                                    : "/default-avatar.png"
+                            }
+                            alt={`${sellerInfo?.firstName || "Seller"} ${sellerInfo?.lastName || ""}`}
                             className="chat-avatar"
                         />
                         <div>
-                            <h4>{sellerData?.displayName || "Seller"}</h4>
-                            <small>About: {listing.title}</small>
+                            <h4>{`${sellerInfo?.firstName || "Seller"} ${sellerInfo?.lastName || ""}`}</h4>
+                            <small>About: {listing?.title}</small>
                         </div>
                     </div>
-                    <button onClick={onClose} className="close-button">×</button>
+                    <button className="chat-close-btn" onClick={onClose}>×</button>
                 </div>
 
+
                 <div className="chat-body">
-                    {isLoading ? (
-                        <p>Loading...</p>
+                    {error ? (
+                        <p className="error-message">{error}</p>
+                    ) : loading ? (
+                        <div className="loading-spinner">Loading...</div>
                     ) : messages.length === 0 ? (
-                        <p className="empty">Start your conversation about {listing.title}</p>
+                        <p className="empty-chat">Start your conversation about {listing.title}</p>
                     ) : (
                         messages.map((msg) => (
                             <div
@@ -183,33 +182,35 @@ const ChatModal = ({ listing, currentUser, onClose }) => {
                                 className={`chat-message ${msg.senderId === currentUser.id ? "sent" : "received"}`}
                             >
                                 <p>{msg.content}</p>
-                                {msg.isMeetupSuggestion && (
-                                    <div className="meetup-note">📍 Suggested meetup: {msg.suggestedLocation}</div>
-                                )}
-                                <small>{msg.timestamp?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small>
+                                <small>
+                                    {msg.timestamp?.toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    }) || "Just now"}
+                                </small>
                             </div>
                         ))
                     )}
-                    <div ref={messagesEndRef}></div>
+                    <div ref={messagesEndRef}/>
                 </div>
 
                 <div className="chat-input">
                     <input
                         type="text"
+                        placeholder="Type your message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                        placeholder="Type your message..."
-                        disabled={isSending}
+                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                        disabled={loading}
                     />
-                    <button onClick={handleSendMessage} disabled={newMessage.trim() === "" || isSending}>
-                        {isSending ? "..." : "Send"}
+                    <button
+                        onClick={sendMessage}
+                        disabled={!newMessage.trim() || loading}
+                    >
+                        {loading ? "Sending..." : "Send"}
                     </button>
-                    <button onClick={suggestMeetup} title="Suggest meetup">📍</button>
                 </div>
             </div>
         </div>
     );
-};
-
-export default ChatModal;
+}
