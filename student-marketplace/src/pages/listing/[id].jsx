@@ -317,6 +317,14 @@ const ListingDetail = () => {
                             <button className="delete-button" onClick={handleDelete}>
                                 Delete Listing
                             </button>
+                            {listing.pricingType === 'bidding' && (
+                                <button 
+                                    className="manage-bids-button" 
+                                    onClick={() => navigate('/manage-bids')}
+                                >
+                                    Manage Bids
+                                </button>
+                            )}
                         </>
                     ) : (
                         <>
