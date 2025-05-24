@@ -53,7 +53,10 @@ const MyListings = () => {
         <div className="my-listings-container">
             <div className="listings-header">
                 <h2>My Listings</h2>
-                <Link to="/sell" className="create-listing-button">Create New Listing</Link>
+                <div className="header-actions">
+                    <Link to="/manage-bids" className="manage-bids-link">Manage Bids</Link>
+                    <Link to="/sell" className="create-listing-button">Create New Listing</Link>
+                </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}

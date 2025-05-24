@@ -694,6 +694,29 @@
     margin: 0 auto;
 }
 
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.manage-bids-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.manage-bids-link:hover {
+    background-color: #1d4ed8;
+    color: white;
+    text-decoration: none;
+}
+
 .create-listing-button {
     display: inline-block;
     padding: 0.75rem 1.5rem;
@@ -716,7 +739,8 @@
 }
 
 .edit-button,
-.delete-button {
+.delete-button,
+.manage-bids-button {
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
@@ -741,6 +765,15 @@
 
 .delete-button:hover {
     background-color: #d32f2f;
+}
+
+.manage-bids-button {
+    background-color: #2563eb;
+    color: white;
+}
+
+.manage-bids-button:hover {
+    background-color: #1d4ed8;
 }
 
 /* Floating Ask Expert Button */
