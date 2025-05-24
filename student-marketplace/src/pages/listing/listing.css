@@ -1,348 +1,245 @@
-.listing-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+/* Global */
+* {
+    box-sizing: border-box;
 }
 
-.button-container {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.filter-button, .sell-button {
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    border: none;
-    transition: background-color 0.2s ease;
-}
-
-.filter-button {
-    background-color: #f0f0f0;
-    color: #333;
-}
-
-.filter-button:hover {
-    background-color: #e0e0e0;
-}
-
-.sell-button {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.sell-button:hover {
-    background-color: #45a049;
-}
-
-.listings-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
-}
-
-.filters-section {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    height: fit-content;
-    position: sticky;
-    top: 2rem;
-}
-
-.filters-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.filters-header h2 {
+body {
+    background-color: #FFFFFF;
+    font-family: 'Segoe UI', sans-serif;
+    color: #4C4C4C;
     margin: 0;
-    color: #333;
 }
 
-.clear-filters {
-    background: none;
-    border: none;
-    color: #4a90e2;
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0;
+/* Ensure full height */
+html, body, #root {
+    height: 100%;
+    background-color: #FFFFFF;
 }
 
-.clear-filters:hover {
-    text-decoration: underline;
+/* Listings Container */
+.listings-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    min-height: calc(100vh - 100px);
+    background-color: #FFFFFF;
+    color: #4C4C4C;
 }
 
-.filters-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.filter-group label {
-    font-weight: 500;
-    color: #555;
-    font-size: 0.9rem;
-}
-
-.filter-group input,
-.filter-group select {
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    width: 100%;
-    background-color: #f8f9fa;
-}
-
-.filter-group input:focus,
-.filter-group select:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-}
-
-.listings-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
+/* Header Section */
 .listings-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
 }
 
 .listings-header h1 {
-    margin: 0;
-    color: #333;
-    font-size: 1.8rem;
+    color: #2A4B93;
+    font-weight: 700;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Primary Buttons */
+.filter-button,
+.sell-button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.filter-button {
+    background-color: #2A4B93;
+    box-shadow: 0 4px 12px rgba(42, 75, 147, 0.2);
+}
+
+.filter-button:hover {
+    background-color: #203b73;
+}
+
+.sell-button {
+    background-color: #666666;
+    box-shadow: 0 4px 12px rgba(102, 102, 102, 0.2);
+}
+
+.sell-button:hover {
+    background-color: #4C4C4C;
+}
+
+/* Listings Grid */
 .listings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 1.5rem;
+    padding: 1rem 0;
 }
 
+/* Listing Card */
 .listing-card {
-    background: white;
+    background-color: #FFFFFF;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
     cursor: pointer;
-    border: 1px solid #eee;
+    border: 1px solid #B0B1B3;
 }
 
 .listing-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    border-color: #FF9900;
+    transform: translateY(-6px);
+    border-color: #2A4B93;
+    box-shadow: 0 8px 24px rgba(42, 75, 147, 0.2);
 }
 
-/* Suggested item highlighting */
-.listing-card.suggested {
-    border: 2px solid #FF9900;
-    box-shadow: 0 4px 20px rgba(255, 153, 0, 0.3);
-    position: relative;
-}
-
-.listing-card.suggested::before {
-    content: "🤖 AI Suggested";
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    z-index: 1;
-}
-
+/* Image */
 .listing-image {
     width: 100%;
     height: 200px;
     overflow: hidden;
+    position: relative;
 }
 
 .listing-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
+.listing-card:hover .listing-image img {
+    transform: scale(1.05);
+}
+
+/* Text */
 .listing-details {
-    padding: 1rem;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    color: #4C4C4C;
 }
 
 .listing-details h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.1rem;
-    color: #333;
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2A4B93;
 }
 
 .price {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #4CAF50;
-    margin: 0.5rem 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2A4B93;
+    margin: 0.3rem 0;
 }
 
-.condition {
-    color: #666;
-    font-size: 0.9rem;
-    margin: 0.25rem 0;
-}
-
+.condition,
 .university {
-    color: #666;
-    font-size: 0.9rem;
-    margin: 0.25rem 0;
+    font-size: 0.95rem;
+    color: #666666;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.2rem 0;
+}
+
+.condition::before {
+    content: "•";
+    color: #2A4B93;
+}
+
+.university::before {
+    content: "🏫";
 }
 
 .seller-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #eee;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #B0B1B3;
 }
 
 .seller-info span {
-    color: #666;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    color: #666666;
 }
 
 .rating {
-    color: #ffc107;
-    font-weight: 500;
+    color: #2A4B93;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
-.error-message {
-    color: #dc3545;
-    text-align: center;
-    padding: 1rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
+/* Empty/Error States */
+.error-message,
 .no-listings {
     text-align: center;
-    color: #666;
+    color: #2A4B93;
     padding: 2rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #F2F2F2;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    font-weight: 500;
 }
 
-.loading {
-    text-align: center;
-    color: #666;
-    padding: 2rem;
-}
-
-.search-button,
-.apply-filters-button {
-    width: 100%;
-    padding: 0.75rem;
-    border: none;
+/* Mini Buttons */
+.mini-button {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
     border-radius: 6px;
-    font-size: 1rem;
+    cursor: pointer;
     font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-top: 0.5rem;
-}
-
-.search-button {
-    background-color: #FF9900;
+    border: none;
     color: white;
-}
-
-.search-button:hover {
-    background-color: #e88b00;
-}
-
-.apply-filters-button {
-    background-color: #4CAF50;
-    color: white;
-    margin-top: 1rem;
-}
-
-.apply-filters-button:hover {
-    background-color: #45a049;
-}
-
-/* Header buttons styling */
-.header-buttons {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.show-all-button {
-    background: #f8f9fa;
-    color: #667eea;
-    border: 2px solid #667eea;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
+    background-color: #2A4B93;
     transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(42, 75, 147, 0.2);
 }
 
-.show-all-button:hover {
-    background: #667eea;
-    color: white;
+.mini-button:hover {
+    background-color: #203b73;
 }
 
-/* Suggestions info bar */
-.suggestions-info {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
+/* Grouping Mini Buttons */
+.button-group {
+
+    gap: 0.5rem;
+
 }
 
-.suggestions-icon {
-    font-size: 18px;
+/* Responsive */
+@media (max-width: 1200px) {
+    .listings-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .listings-container {
+@media (max-width: 900px) {
+    .listings-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .listings-grid {
         grid-template-columns: 1fr;
     }
 
-    .filters-section {
-        position: static;
-        margin-bottom: 1rem;
+    .listing-card {
+        max-width: 400px;
+        margin: 0 auto;
     }
 
     .listings-header {
@@ -350,20 +247,11 @@
         gap: 1rem;
         text-align: center;
     }
-
-    .listings-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
 }
 
-/* Listing Detail Page Styles */
-.listing-detail-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+/* Fade-in animation (optional) */
+.listings-content {
+    animation: fadeIn 0.5s ease;
 }
 
 .listing-images {
@@ -821,4 +709,7 @@
 .ask-expert-button:hover::before {
     opacity: 1;
     transform: translateX(0);
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
