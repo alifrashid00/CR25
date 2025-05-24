@@ -4,6 +4,7 @@ import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
 import './listing-detail.css';
 import MessageButton from "../../components/MessegeButton.jsx";
+import ExpertChat from "../../components/ExpertChat.jsx";
 
 const ListingDetail = () => {
     const { id } = useParams();
@@ -70,12 +71,6 @@ const ListingDetail = () => {
                 setError('Failed to delete listing. Please try again.');
             }
         }
-    };
-
-    // Add function to handle expert button click
-    const handleAskExpert = () => {
-        // TODO: Implement expert chat functionality
-        console.log('Ask expert clicked');
     };
 
     if (loading) {
@@ -203,14 +198,11 @@ const ListingDetail = () => {
                 </div>
             </div>
 
-            {/* Add the floating Ask Expert button */}
-            <button 
-                className="ask-expert-button"
-                onClick={handleAskExpert}
-                aria-label="Ask Expert"
-            >
-                👨‍🎓
-            </button>
+            {/* Replace the old ask expert button with the new ExpertChat component */}
+            <ExpertChat 
+                listing={listing}
+                onClose={() => {/* Handle close if needed */}}
+            />
 
             {showRatingModal && (
                 <div className="modal-overlay">
