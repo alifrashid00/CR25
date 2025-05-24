@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
-import { getServiceById, incrementViewCount, updateProviderRating } from '../../services/services';
+import { getServiceById, incrementViewCount, updateProviderRating, deleteService } from '../../services/services';
 import './service-detail.css';
+import MessageButton from "../../components/MessegeButton.jsx";
 
 const ServiceDetail = () => {
     const { id } = useParams();
@@ -71,6 +72,22 @@ const ServiceDetail = () => {
         });
     };
 
+    const handleEdit = () => {
+        navigate(`/services/${id}/edit`);
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this service?')) {
+            try {
+                await deleteService(id);
+                navigate('/my-services');
+            } catch (error) {
+                console.error('Error deleting service:', error);
+                setError('Failed to delete service. Please try again.');
+            }
+        }
+    };
+
     if (loading) {
         return <div className="loading">Loading service details...</div>;
     }
@@ -82,6 +99,8 @@ const ServiceDetail = () => {
     if (!service) {
         return <div className="error-message">Service not found</div>;
     }
+
+    const isOwner = user && user.uid === service.userId;
 
     return (
         <div className="service-detail-container">
@@ -162,15 +181,35 @@ const ServiceDetail = () => {
                     </div>
 
                     <div className="provider-actions">
-                        <button className="contact-button" onClick={handleContact}>
-                            Contact Provider
-                        </button>
-                        <button 
-                            className="rate-button"
-                            onClick={() => setShowRatingModal(true)}
-                        >
-                            Rate Provider
-                        </button>
+                        {isOwner ? (
+                            <>
+                                <button className="edit-button" onClick={handleEdit}>
+                                    Edit Service
+                                </button>
+                                <button className="delete-button" onClick={handleDelete}>
+                                    Delete Service
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <MessageButton
+                                    service={service}
+                                    currentUser={{
+                                        id: user?.uid,
+                                        displayName: user?.displayName,
+                                        photoURL: user?.photoURL,
+                                    }}
+                                />
+                                {user && (
+                                    <button 
+                                        className="rate-button"
+                                        onClick={() => setShowRatingModal(true)}
+                                    >
+                                        Rate Provider
+                                    </button>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
 

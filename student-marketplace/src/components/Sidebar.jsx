@@ -31,11 +31,17 @@ const Sidebar = () => {
                 <Link to="/listing" className={`nav-item ${isActive('/listing') ? 'active' : ''}`}>
                     Browse Listings
                 </Link>
+                <Link to="/my-listings" className={`nav-item ${isActive('/my-listings') ? 'active' : ''}`}>
+                    My Listings
+                </Link>
                 <Link to="/sell" className={`nav-item ${isActive('/sell') ? 'active' : ''}`}>
                     Sell Item
                 </Link>
                 <Link to="/services" className={`nav-item ${isActive('/services') ? 'active' : ''}`}>
                     Browse Services
+                </Link>
+                <Link to="/my-services" className={`nav-item ${isActive('/my-services') ? 'active' : ''}`}>
+                    My Services
                 </Link>
                 <Link to="/offer-service" className={`nav-item ${isActive('/offer-service') ? 'active' : ''}`}>
                     Offer Service

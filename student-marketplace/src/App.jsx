@@ -11,6 +11,10 @@ import Unauthorized from "./pages/Unauthorized.jsx";
 import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import ServiceDetail from './pages/services/ServiceDetail';
 import Sidebar from './components/Sidebar';
+import MyListings from "./pages/listing/MyListings.jsx";
+import MyServices from "./pages/services/MyServices.jsx";
+import EditListing from "./pages/listing/EditListing.jsx";
+import EditService from "./pages/services/EditService.jsx";
 
 // Layout component that includes the sidebar
 const Layout = ({ children }) => {
@@ -101,6 +105,46 @@ function App() {
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
                             <Layout>
                                 <ServiceDetail />
+                            </Layout>
+                        </RoleBasedRoute>
+                    } 
+                />
+                <Route 
+                    path="/my-listings" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student", "admin"]}>
+                            <Layout>
+                                <MyListings />
+                            </Layout>
+                        </RoleBasedRoute>
+                    } 
+                />
+                <Route 
+                    path="/my-services" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student", "admin"]}>
+                            <Layout>
+                                <MyServices />
+                            </Layout>
+                        </RoleBasedRoute>
+                    } 
+                />
+                <Route 
+                    path="/listing/:id/edit" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student", "admin"]}>
+                            <Layout>
+                                <EditListing />
+                            </Layout>
+                        </RoleBasedRoute>
+                    } 
+                />
+                <Route 
+                    path="/services/:id/edit" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student", "admin"]}>
+                            <Layout>
+                                <EditService />
                             </Layout>
                         </RoleBasedRoute>
                     } 
