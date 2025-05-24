@@ -10,22 +10,38 @@ import Sell from "./pages/sell/sell.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
 import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import ServiceDetail from './pages/services/ServiceDetail';
+import Sidebar from './components/Sidebar';
+
+// Layout component that includes the sidebar
+const Layout = ({ children }) => {
+    return (
+        <div className="app-layout">
+            <Sidebar />
+            <div className="main-content">
+                {children}
+            </div>
+        </div>
+    );
+};
 
 function App() {
     return (
         <Router>
             <Routes>
+                {/* Public routes without sidebar */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 
-                {/* Protected Routes */}
+                {/* Protected Routes with sidebar */}
                 <Route 
                     path="/dashboard" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <Dashboard />
+                            <Layout>
+                                <Dashboard />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
@@ -33,7 +49,9 @@ function App() {
                     path="/listing" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <Listing />
+                            <Layout>
+                                <Listing />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
@@ -41,18 +59,19 @@ function App() {
                     path="/sell" 
                     element={
                         <RoleBasedRoute allowedRoles={["student"]}>
-                            <Sell />
+                            <Layout>
+                                <Sell />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
-
-
-
                 <Route 
                     path="/listing/:id" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <ListingDetail />
+                            <Layout>
+                                <ListingDetail />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
@@ -60,7 +79,9 @@ function App() {
                     path="/services" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <Services />
+                            <Layout>
+                                <Services />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
@@ -68,7 +89,9 @@ function App() {
                     path="/offer-service" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <OfferServices />
+                            <Layout>
+                                <OfferServices />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
@@ -76,7 +99,9 @@ function App() {
                     path="/services/:id" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <ServiceDetail />
+                            <Layout>
+                                <ServiceDetail />
+                            </Layout>
                         </RoleBasedRoute>
                     } 
                 />
