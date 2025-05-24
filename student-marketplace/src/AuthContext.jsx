@@ -6,18 +6,18 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
+import { db } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
+
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
+export function AuthProvider({ children }) {    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // University email domains (you can expand this list)
     const universityDomains = [
         "iut-dhaka.edu",
         "du.edu",
-        // add other university domains
     ];
 
     function isUniversityEmail(email) {
@@ -46,6 +46,23 @@ export function AuthProvider({ children }) {
         });
         return () => unsubscribe();
     }, []);
+
+
+//     useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+//         setLoading(true);
+//         if (currentUser) {
+//             const userDoc = await getDoc(doc(db, "users", currentUser.email));
+//             const role = userDoc.exists() ? userDoc.data().role : null;
+//             setUser({ ...currentUser, role });
+//         } else {
+//             setUser(null);
+//         }
+//         setLoading(false);
+//     });
+
+//     return () => unsubscribe();
+// }, []);
 
     const value = {
         user,

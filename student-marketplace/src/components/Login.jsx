@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom";
+import "./login.css";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ const Login = () => {
         try {
             const auth = getAuth();
             await signInWithEmailAndPassword(auth, email, password);
-            navigate("/dashboard");  // Redirect to dashboard after login
+            navigate("/dashboard");
         } catch (err) {
             setError(err.message);
         } finally {
@@ -27,31 +27,34 @@ const Login = () => {
     };
 
     return (
-        <div className="auth-container">
-            <h2>Login</h2>
-            {error && <p className="error">{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    required
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    required
-                />
-                <button type="submit" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
-            <div className="auth-links">
-                <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
-                <p><Link to="/forgot-password">Forgot password?</Link></p>
+        <div className="login-container">
+            <div className="login-card">
+                <h2 className="login-title">Welcome Back</h2>
+                <p className="login-subtitle">Login to your student account</p>
+                {error && <p className="login-error">{error}</p>}
+                <form onSubmit={handleSubmit} className="login-form">
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
+                </form>
+                <div className="login-links">
+                    <p>Don’t have an account? <Link to="/signup">Sign Up</Link></p>
+                    <p><Link to="/forgot-password">Forgot Password?</Link></p>
+                </div>
             </div>
         </div>
     );
