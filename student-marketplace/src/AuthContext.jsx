@@ -10,11 +10,13 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
-
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {    const [user, setUser] = useState(null);
+export function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [roleLoading, setRoleLoading] = useState(false);
 
     const universityDomains = [
         "iut-dhaka.edu",
@@ -33,15 +35,43 @@ export function AuthProvider({ children }) {    const [user, setUser] = useState
     }
 
     async function logIn(email, password) {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        if (!result.user.emailVerified) {
-            await auth.signOut();
-            throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
+        try {
+            setRoleLoading(true);
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            
+            if (!result.user.emailVerified) {
+                await auth.signOut();
+                throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
+            }
+            
+            // Fetch user role immediately after successful login
+            const userDoc = await getDoc(doc(db, "users", email));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.suspended) {
+                    await auth.signOut();
+                    throw new Error("Your account has been suspended. Please contact support.");
+                }
+                setUser(result.user);
+                setUserRole(userData.isCoAdmin ? 'student' : userData.role);
+            } else {
+                await auth.signOut();
+                throw new Error("User data not found. Please contact support.");
+            }
+            
+            return result;
+        } catch (error) {
+            setUser(null);
+            setUserRole(null);
+            throw error;
+        } finally {
+            setRoleLoading(false);
         }
-        return result;
     }
 
     function logOut() {
+        setUser(null);
+        setUserRole(null);
         return signOut(auth);
     }
 
@@ -57,34 +87,55 @@ export function AuthProvider({ children }) {    const [user, setUser] = useState
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
-                // Check if user is suspended
-                const userDoc = await getDoc(doc(db, "users", currentUser.email));
-                if (userDoc.exists() && userDoc.data().suspended) {
-                    // Sign out the user if they are suspended
-                    await auth.signOut();
+                try {
+                    setRoleLoading(true);
+                    // Check if user is suspended
+                    const userDoc = await getDoc(doc(db, "users", currentUser.email));
+                    if (userDoc.exists()) {
+                        if (userDoc.data().suspended) {
+                            // Sign out the user if they are suspended
+                            await auth.signOut();
+                            setUser(null);
+                            setUserRole(null);
+                        } else if (!currentUser.emailVerified) {
+                            // Sign out if email is not verified
+                            await auth.signOut();
+                            setUser(null);
+                            setUserRole(null);
+                        } else {
+                            // Update email verification status in Firestore
+                            await updateEmailVerificationStatus(currentUser);
+                            setUser(currentUser);
+                            // Set user role
+                            const userData = userDoc.data();
+                            setUserRole(userData.isCoAdmin ? 'student' : userData.role);
+                        }
+                    } else {
+                        await auth.signOut();
+                        setUser(null);
+                        setUserRole(null);
+                    }
+                } catch (error) {
+                    console.error("Error in auth state change:", error);
                     setUser(null);
-                } else if (!currentUser.emailVerified) {
-                    // Sign out if email is not verified
-                    await auth.signOut();
-                    setUser(null);
-                } else {
-                    // Update email verification status in Firestore
-                    await updateEmailVerificationStatus(currentUser);
-                    setUser(currentUser);
+                    setUserRole(null);
+                } finally {
+                    setRoleLoading(false);
                 }
             } else {
                 setUser(null);
+                setUserRole(null);
             }
             setLoading(false);
         });
         return () => unsubscribe();
     }, []);
 
-
-
-
     const value = {
         user,
+        userRole,
+        loading,
+        roleLoading,
         signUp,
         logIn,
         logOut,
