@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
-import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
+import { getListingById, incrementViewCount, updateSellerRating, deleteListing, markAsSold } from '../../services/listings';
 import { createBid, getListingBids, getHighestBid } from '../../services/bids';
 import './listing-detail.css';
 import MessageButton from "../../components/MessageButton";
@@ -171,6 +171,18 @@ const ListingDetail = () => {
         }
     };
 
+    const handleMarkAsSold = async () => {
+        if (window.confirm('Are you sure you want to mark this listing as sold? This will remove it from search results.')) {
+            try {
+                await markAsSold(id);
+                navigate('/my-listings');
+            } catch (error) {
+                console.error('Error marking listing as sold:', error);
+                setError('Failed to mark listing as sold. Please try again.');
+            }
+        }
+    };
+
     if (loading) {
         return <div className="loading">Loading listing...</div>;
     }
@@ -316,6 +328,9 @@ const ListingDetail = () => {
                             </button>
                             <button className="delete-button" onClick={handleDelete}>
                                 Delete Listing
+                            </button>
+                            <button className="sold-button" onClick={handleMarkAsSold}>
+                                Mark as Sold
                             </button>
                             {listing.pricingType === 'bidding' && (
                                 <button 

@@ -214,9 +214,19 @@ html, body, #root {
 
 /* Grouping Mini Buttons */
 .button-group {
-
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
+    margin-top: 1rem;
+}
 
+.mini-button.sold-button {
+    background-color: #059669;
+    color: white;
+}
+
+.mini-button.sold-button:hover {
+    background-color: #047857;
 }
 
 /* Responsive */

@@ -217,9 +217,10 @@
     display: flex;
     gap: 12px;
     margin-top: 24px;
+    flex-wrap: wrap;
 }
 
-.btn-edit, .btn-delete, .btn-rate {
+.edit-button, .delete-button, .rate-button, .sold-button, .manage-bids-button {
     padding: 12px 20px;
     border-radius: 8px;
     font-size: 16px;
@@ -229,31 +230,49 @@
     border: none;
 }
 
-.btn-edit {
+.edit-button {
     background: #e0e7ff;
     color: #4f46e5;
 }
 
-.btn-edit:hover {
+.edit-button:hover {
     background: #c7d2fe;
 }
 
-.btn-delete {
+.delete-button {
     background: #fee2e2;
     color: #dc2626;
 }
 
-.btn-delete:hover {
+.delete-button:hover {
     background: #fecaca;
 }
 
-.btn-rate {
+.sold-button {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.sold-button:hover {
+    background: #a7f3d0;
+}
+
+.rate-button {
     background: #f5f3ff;
     color: #4f46e5;
 }
 
-.btn-rate:hover {
+.rate-button:hover {
     background: #ddd6fe;
+}
+
+.manage-bids-button {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.manage-bids-button:hover {
+    background: #bfdbfe;
 }
 
 /* Reviews Section */

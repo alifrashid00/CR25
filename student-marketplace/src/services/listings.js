@@ -9,7 +9,6 @@ import {
     orderBy, 
     limit,
     updateDoc,
-    deleteDoc,
     serverTimestamp,
     increment,
     startAfter,
@@ -257,6 +256,21 @@ export const deleteListing = async (listingId) => {
         return listingId;
     } catch (error) {
         console.error('Error deleting listing:', error);
+        throw error;
+    }
+};
+
+// Mark a listing as sold
+export const markAsSold = async (listingId) => {
+    try {
+        const docRef = doc(db, LISTINGS_COLLECTION, listingId);
+        await updateDoc(docRef, {
+            status: 'sold',
+            soldAt: serverTimestamp()
+        });
+        return listingId;
+    } catch (error) {
+        console.error('Error marking listing as sold:', error);
         throw error;
     }
 };
