@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating } from '../../services/listings';
 import './listing.css';
+import MessageButton from "../../components/MessegeButton.jsx";
 
 const ListingDetail = () => {
     const { id } = useParams();
@@ -146,12 +147,14 @@ const ListingDetail = () => {
                 </div>
 
                 <div className="action-buttons">
-                    <button
-                        className="contact-button"
-                        onClick={() => navigate(`/chat/${listing.userId}`)}
-                    >
-                        Contact Seller
-                    </button>
+                    <MessageButton
+                        listing={listing}
+                        currentUser={{
+                            id: user?.uid,
+                            displayName: user?.displayName,
+                            photoURL: user?.photoURL,
+                        }}
+                    />
                     {user && user.uid !== listing.userId && (
                         <button
                             className="rate-button"
