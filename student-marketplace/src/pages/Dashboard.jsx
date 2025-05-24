@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+import buyImage from '../assets/buy.png';
+import bidImage from '../assets/bid.png';
+import servicesImage from '../assets/services.png';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -9,19 +12,19 @@ export default function Dashboard() {
         {
             title: 'Listings',
             description: 'Manage your product listings, create new ones, or edit existing ones.',
-            image: './assets/buy.png',
+            image: buyImage,
             route: '/listing'
         },
         {
             title: 'Manage Bids',
             description: 'View and manage bids on your listings, accept or reject offers.',
-            image: '/assets/bid.png',
+            image: bidImage,
             route: '/manage-bids'
         },
         {
             title: 'Services',
             description: 'Offer your services or find services from other students.',
-            image: '/assets/services.png',
+            image: servicesImage,
             route: '/services'
         }
     ];
