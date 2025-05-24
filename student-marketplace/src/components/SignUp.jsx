@@ -6,8 +6,7 @@ import { db } from "../firebase";
 import "./signup.css";
 
 const SignUp = () => {
-    const [formData, setFormData] = useState({
-        firstName: "",
+    const [formData, setFormData] = useState({        firstName: "",
         lastName: "",
         email: "",
         password: "",
@@ -17,7 +16,8 @@ const SignUp = () => {
         dateOfBirth: "",
         department: "",
         program: "",
-        yearOfStudy: ""
+        yearOfStudy: "",
+        university: ""
     });
     const [previewPic, setPreviewPic] = useState(null);
     const [error, setError] = useState("");
@@ -191,6 +191,16 @@ const SignUp = () => {
                         id="email"
                         name="email"
                         value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>                <div className="form-group">
+                    <label htmlFor="university">University</label>
+                    <input
+                        type="text"
+                        id="university"
+                        name="university"
+                        value={formData.university}
                         onChange={handleChange}
                         required
                     />

@@ -11,14 +11,14 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({
+    const [isEditing, setIsEditing] = useState(false);    const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         phoneNumber: '',
         studentId: '',
         dateOfBirth: '',
         profilePic: '',
+        university: '',
         department: '',
         program: '',
         yearOfStudy: ''
@@ -44,13 +44,13 @@ const Profile = () => {
                     const userDoc = await getDoc(doc(db, "users", user.email));
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        const newData = {
-                            firstName: userData.firstName || '',
+                        const newData = {                            firstName: userData.firstName || '',
                             lastName: userData.lastName || '',
                             phoneNumber: userData.phoneNumber || '',
                             studentId: userData.studentId || '',
                             dateOfBirth: userData.dateOfBirth || '',
                             profilePic: userData.profilePic || '',
+                            university: userData.university || '',
                             department: userData.department || '',
                             program: userData.program || '',
                             yearOfStudy: userData.yearOfStudy || ''
@@ -272,15 +272,26 @@ const Profile = () => {
                         disabled={!isEditing}
                         required
                     />
-                </div>
-
-                <div className="form-group">
+                </div>                <div className="form-group">
                     <label htmlFor="dateOfBirth">Date of Birth</label>
                     <input
                         type="date"
                         id="dateOfBirth"
                         name="dateOfBirth"
                         value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="university">University</label>
+                    <input
+                        type="text"
+                        id="university"
+                        name="university"
+                        value={formData.university}
                         onChange={handleChange}
                         disabled={!isEditing}
                         required
