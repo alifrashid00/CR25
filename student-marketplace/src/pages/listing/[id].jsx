@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
 import { createBid, getListingBids, getHighestBid } from '../../services/bids';
+import { getListingReviews, createReview } from '../../services/reviews';
 import './listing-detail.css';
 import MessageButton from "../../components/MessageButton";
 import ExpertChat from "../../components/ExpertChat";
