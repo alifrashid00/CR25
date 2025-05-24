@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
+import './listing-detail.css';
+import MessageButton from "../../components/MessegeButton.jsx";
+import ExpertChat from "../../components/ExpertChat.jsx";
+
 import './listing.css';
-import MessageButton from "../../components/MessageButton.jsx";
+
 const ListingDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -15,11 +19,7 @@ const ListingDetail = () => {
     const [rating, setRating] = useState(0);
     const [showRatingModal, setShowRatingModal] = useState(false);
 
-    useEffect(() => {
-        fetchListing();
-    }, [id]);
-
-    const fetchListing = async () => {
+    const fetchListing = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -34,7 +34,11 @@ const ListingDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchListing();
+    }, [fetchListing]);
 
     const handleRatingSubmit = async () => {
         try {
@@ -208,6 +212,12 @@ const ListingDetail = () => {
                 </div>
             </div>
 
+            {/* Replace the old ask expert button with the new ExpertChat component */}
+            <ExpertChat 
+                listing={listing}
+                onClose={() => {/* Handle close if needed */}}
+            />
+
             {showRatingModal && (
                 <div className="modal-overlay">
                     <div className="rating-modal">
@@ -244,4 +254,4 @@ const ListingDetail = () => {
     );
 };
 
-export default ListingDetail; 
+export default ListingDetail;

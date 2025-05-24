@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import "./login.css";
 
 const Login = () => {
@@ -17,7 +19,28 @@ const Login = () => {
 
         try {
             const auth = getAuth();
-            await signInWithEmailAndPassword(auth, email, password);
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            
+            if (!result.user.emailVerified) {
+                // If email is not verified, send a new verification email and show message
+                await sendEmailVerification(result.user);
+                await auth.signOut();
+                setError("Please verify your email first. A new verification link has been sent to your email address.");
+                setLoading(false);
+                return;
+            }
+            
+            // Check if user is suspended
+            const userDocRef = doc(db, "users", email);
+            const userDocSnap = await getDoc(userDocRef);
+            
+            if (userDocSnap.exists() && userDocSnap.data().suspended) {
+                // Sign out the user if they are suspended
+                await auth.signOut();
+                navigate("/suspended");
+                return;
+            }
+
             navigate("/dashboard");
         } catch (err) {
             setError(err.message);
@@ -52,7 +75,7 @@ const Login = () => {
                     </button>
                 </form>
                 <div className="login-links">
-                    <p>Don’t have an account? <Link to="/signup">Sign Up</Link></p>
+                    <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
                     <p><Link to="/forgot-password">Forgot Password?</Link></p>
                 </div>
             </div>

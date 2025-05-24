@@ -15,7 +15,13 @@ export default function RoleBasedRoute({ children, allowedRoles }) {
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.email));
                     if (userDoc.exists()) {
-                        setUserRole(userDoc.data().role);
+                        const userData = userDoc.data();
+                        // If user is a Co-Admin, they get student and co-admin permissions
+                        if (userData.isCoAdmin) {
+                            setUserRole('student');
+                        } else {
+                            setUserRole(userData.role);
+                        }
                     }
                 } catch (error) {
                     console.error("Error fetching user role:", error);
@@ -40,4 +46,4 @@ export default function RoleBasedRoute({ children, allowedRoles }) {
     }
 
     return children;
-} 
+}
