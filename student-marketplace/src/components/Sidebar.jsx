@@ -1,12 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const { user, logOut } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (user?.email) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.email));
+                    if (userDoc.exists()) {
+                        setUserData(userDoc.data());
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            }
+        };
+
+        fetchUserData();
+    }, [user]);
 
     const handleLogout = async () => {
         try {
@@ -18,6 +38,13 @@ const Sidebar = () => {
     };
 
     const isActive = (path) => location.pathname === path;
+
+    const getFullName = () => {
+        if (userData) {
+            return `${userData.firstName} ${userData.lastName}`.trim();
+        }
+        return "User";
+    };
 
     return (
         <div className="sidebar">
@@ -49,9 +76,23 @@ const Sidebar = () => {
             </nav>
             <div className="sidebar-footer">
                 {user && (
-                    <button onClick={handleLogout} className="logout-button">
-                        Logout
-                    </button>
+                    <>
+                        <div className="profile-section">                            <img 
+                                src={userData?.profilePic || "/default-avatar.png"} 
+                                alt="Profile" 
+                                className="profile-photo"
+                            />
+                            <div className="profile-info">
+                                <span className="profile-name">{getFullName()}</span>
+                                <button onClick={() => navigate('/profile')} className="profile-button">
+                                    View Profile
+                                </button>
+                            </div>
+                        </div>
+                        <button onClick={handleLogout} className="logout-button">
+                            Logout
+                        </button>
+                    </>
                 )}
             </div>
         </div>
