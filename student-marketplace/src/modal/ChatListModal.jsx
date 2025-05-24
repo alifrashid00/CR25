@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import ChatModal from "./ChatModal.jsx";
+import './ChatListModal.css'
 
 const ChatListModal = ({ listing, sellerId, onClose }) => {
     console.log("ChatListModal props:", { listing, sellerId });
@@ -79,18 +80,39 @@ const ChatListModal = ({ listing, sellerId, onClose }) => {
                 ) : buyers.length === 0 ? (
                     <p>No buyers have messaged yet.</p>
                 ) : (
-                    <ul className="space-y-2">
-                        {buyers.map((buyer) => (
-                            <li
-                                key={buyer.id}
-                                className="cursor-pointer hover:bg-gray-100 p-2 rounded border"
-                                onClick={() => handleOpenChat(buyer)}
-                            >
-                                <p className="font-medium">{buyer.name}</p>
-                                <p className="text-sm text-gray-600">{buyer.email}</p>
-                            </li>
-                        ))}
+                    <ul className="chat-list">
+                        {buyers.map((buyer) => {
+                            const initials = buyer.name
+                                .split(' ')
+                                .map((word) => word[0])
+                                .join('')
+                                .toUpperCase();
+
+                            return (
+                                <li
+                                    key={buyer.id}
+                                    className="chat-list-item"
+                                    onClick={() => handleOpenChat(buyer)}
+                                >
+                                    {buyer.profilePic ? (
+                                        <img src={buyer.profilePic} alt={buyer.name} className="chat-avatar-image" />
+                                    ) : (
+                                        <div className="chat-avatar">{initials}</div>
+                                    )}
+                                    <div className="chat-content">
+                                        <div className="chat-header">
+                                            <span className="chat-name">{buyer.name}</span>
+                                            <span className="chat-time">4:30 PM</span>
+                                        </div>
+                                        <div className="chat-message">Click to open chat</div>
+                                    </div>
+                                    {/* Optionally add unread badge */}
+                                    {/* <div className="chat-badge">2</div> */}
+                                </li>
+                            );
+                        })}
                     </ul>
+
                 )}
 
                 {conversationId && selectedBuyer && (

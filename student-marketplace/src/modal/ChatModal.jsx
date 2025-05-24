@@ -76,7 +76,7 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                 </div>
             </div>
 
-          
+
         </div>
 
     );

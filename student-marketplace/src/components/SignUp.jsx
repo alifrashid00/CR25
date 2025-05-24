@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import "./signup.css";
 
 const SignUp = () => {
-    const [formData, setFormData] = useState({
-        firstName: "",
+    const [formData, setFormData] = useState({        firstName: "",
         lastName: "",
         email: "",
         password: "",
@@ -17,7 +16,10 @@ const SignUp = () => {
         dateOfBirth: "",
         department: "",
         program: "",
-        yearOfStudy: ""
+        yearOfStudy: "",
+        university: "",
+        isCoAdmin: false,
+        suspended: false
     });
     const [previewPic, setPreviewPic] = useState(null);
     const [error, setError] = useState("");
@@ -101,6 +103,9 @@ const SignUp = () => {
             // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             
+            // Send verification email
+            await sendEmailVerification(userCredential.user);
+            
             // Store additional user data in Firestore using email as document ID
             await setDoc(doc(db, "users", email), {
                 ...userData,
@@ -108,11 +113,14 @@ const SignUp = () => {
                 email,
                 profilePic: previewPic || "",
                 createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                emailVerified: false
             });
 
-            // Redirect to dashboard after successful signup
-            navigate("/dashboard");
+            // Show verification message and redirect
+            alert("A verification email has been sent to your email address. Please verify your email before logging in.");
+            await auth.signOut(); // Sign out the user until they verify their email
+            navigate("/login");
         } catch (err) {
             setError(err.message);
         }
@@ -191,6 +199,16 @@ const SignUp = () => {
                         id="email"
                         name="email"
                         value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>                <div className="form-group">
+                    <label htmlFor="university">University</label>
+                    <input
+                        type="text"
+                        id="university"
+                        name="university"
+                        value={formData.university}
                         onChange={handleChange}
                         required
                     />

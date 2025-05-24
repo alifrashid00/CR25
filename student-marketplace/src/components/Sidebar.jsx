@@ -63,8 +63,7 @@ const Sidebar = () => {
                 </Link>
                 <Link to="/sell" className={`nav-item ${isActive('/sell') ? 'active' : ''}`}>
                     Sell Item
-                </Link>
-                <Link to="/services" className={`nav-item ${isActive('/services') ? 'active' : ''}`}>
+                </Link>                <Link to="/services" className={`nav-item ${isActive('/services') ? 'active' : ''}`}>
                     Browse Services
                 </Link>
                 <Link to="/my-services" className={`nav-item ${isActive('/my-services') ? 'active' : ''}`}>
@@ -73,6 +72,11 @@ const Sidebar = () => {
                 <Link to="/offer-service" className={`nav-item ${isActive('/offer-service') ? 'active' : ''}`}>
                     Offer Service
                 </Link>
+                {userData?.role === 'admin' && (
+                    <Link to="/manage-students" className={`nav-item ${isActive('/manage-students') ? 'active' : ''}`}>
+                        Manage Students
+                    </Link>
+                )}
             </nav>
             <div className="sidebar-footer">
                 {user && (

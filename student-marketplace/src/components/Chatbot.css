@@ -41,7 +41,7 @@
 }
 
 .chatbot-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #232F3E;
   color: white;
   padding: 16px;
   display: flex;
@@ -107,14 +107,14 @@
 }
 
 .user-message .message-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #FF9900;
   color: white;
   border-bottom-right-radius: 6px;
 }
 
 .bot-message .message-content {
   background: white;
-  color: #333;
+  color: #232F3E;
   border: 1px solid #e1e5e9;
   border-bottom-left-radius: 6px;
 }
@@ -183,7 +183,7 @@
 }
 
 .chatbot-input textarea:focus {
-  border-color: #667eea;
+  border-color: #FF9900;
 }
 
 .chatbot-input textarea:disabled {
@@ -192,7 +192,7 @@
 }
 
 .send-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #FF9900;
   color: white;
   border: none;
   border-radius: 50%;
@@ -209,7 +209,7 @@
 
 .send-button:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  background: #e88b00;
 }
 
 .send-button:disabled {

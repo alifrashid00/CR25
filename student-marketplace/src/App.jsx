@@ -8,14 +8,17 @@ import Services from "./pages/services/services.jsx";
 import OfferServices from "./pages/services/offer-services.jsx";
 import Sell from "./pages/sell/sell.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
+import Suspended from "./pages/Suspended.jsx";
 import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import ServiceDetail from './pages/services/ServiceDetail';
 import Sidebar from './components/Sidebar';
 import Profile from "./pages/profile/Profile.jsx";
+import ManageStudents from "./pages/admin/ManageStudents.jsx";
 import MyListings from "./pages/listing/MyListings.jsx";
 import MyServices from "./pages/services/MyServices.jsx";
 import EditListing from "./pages/listing/EditListing.jsx";
 import EditService from "./pages/services/EditService.jsx";
+import AdminViewProfile from "./pages/admin/AdminViewProfile.jsx";
 
 // Layout component that includes the sidebar
 const Layout = ({ children }) => {
@@ -33,11 +36,11 @@ function App() {
     return (
         <Router>
             <Routes>
-                {/* Public routes without sidebar */}
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                {/* Public routes without sidebar */}                <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
+                <Route path="/suspended" element={<Suspended />} />
                 
                 {/* Protected Routes with sidebar */}
                 <Route 
@@ -109,8 +112,7 @@ function App() {
                             </Layout>
                         </RoleBasedRoute>
                     } 
-                />
-                <Route 
+                />                <Route 
                     path="/profile" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
@@ -119,9 +121,19 @@ function App() {
                             </Layout>
                         </RoleBasedRoute>
                     }
-                    />
+                />
+                <Route 
+                    path="/manage-students" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["admin"]}>
+                            <Layout>
+                                <ManageStudents />
+                            </Layout>
+                        </RoleBasedRoute>
+                    }
+                />
                 <Route    
-                    path="/my-listings" 
+                    path="/my-listings"
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
                             <Layout>
@@ -159,6 +171,16 @@ function App() {
                             </Layout>
                         </RoleBasedRoute>
                     } 
+                />
+                <Route 
+                    path="/manage-students/:email" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["admin"]}>
+                            <Layout>
+                                <AdminViewProfile />
+                            </Layout>
+                        </RoleBasedRoute>
+                    }
                 />
             </Routes>
 

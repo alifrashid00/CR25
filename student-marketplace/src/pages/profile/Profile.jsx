@@ -12,19 +12,20 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({
+    const [isEditing, setIsEditing] = useState(false);    const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         phoneNumber: '',
         studentId: '',
         dateOfBirth: '',
         profilePic: '',
+        university: '',
         department: '',
-        program: '',
+        program: '',        
         yearOfStudy: '',
-        rating: 0,
+        ratings: 0,
         totalRatings: 0
+        
     });
     const [reviews, setReviews] = useState([]);
     const [previewPic, setPreviewPic] = useState(null);
@@ -277,15 +278,26 @@ const Profile = () => {
                         disabled={!isEditing}
                         required
                     />
-                </div>
-
-                <div className="form-group">
+                </div>                <div className="form-group">
                     <label htmlFor="dateOfBirth">Date of Birth</label>
                     <input
                         type="date"
                         id="dateOfBirth"
                         name="dateOfBirth"
                         value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="university">University</label>
+                    <input
+                        type="text"
+                        id="university"
+                        name="university"
+                        value={formData.university}
                         onChange={handleChange}
                         disabled={!isEditing}
                         required
@@ -338,6 +350,22 @@ const Profile = () => {
                         <option value="5">5th Year</option>
                     </select>
                 </div>
+
+                {/* <div className="form-group">
+                    <label>Ratings</label>
+                    <div className="ratings-display">
+                        <div className="rating-stars">
+                            <span className="stars">★</span>
+                            <span className="rating-value">                                {formData.ratings ? formData.ratings.toFixed(1) : 'New'}
+                            </span>
+                            {formData.totalRatings > 0 && (
+                                <span className="rating-count">
+                                    ({formData.totalRatings} {formData.totalRatings === 1 ? 'rating' : 'ratings'})
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div> */}
 
                 {isEditing && (
                     <div className="button-group">
