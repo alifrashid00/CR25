@@ -2,11 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { getChatbotResponse, extractFiltersFromResponse } from '../services/groq';
 import './Chatbot.css';
 
-const Chatbot = ({ onFiltersUpdate, isOpen, onToggle }) => {
-  const [messages, setMessages] = useState([
+const Chatbot = ({ onFiltersUpdate, isOpen, onToggle, availableListings = [], onSuggestionsUpdate }) => {  const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! I'm here to help you find the perfect items. What are you looking for today?",
+      text: "Hi! I'm your shopping assistant. I've analyzed all the available items in the marketplace. Tell me what you're looking for, and I'll help you find the perfect match or suggest similar alternatives!",
       isBot: true,
       timestamp: new Date()
     }
@@ -36,10 +35,8 @@ const Chatbot = ({ onFiltersUpdate, isOpen, onToggle }) => {
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
-    setIsLoading(true);
-
-    try {
-      const response = await getChatbotResponse(inputMessage, conversationHistory);
+    setIsLoading(true);    try {
+      const response = await getChatbotResponse(inputMessage, conversationHistory, availableListings);
       
       // Update conversation history
       const newHistory = [
@@ -50,12 +47,36 @@ const Chatbot = ({ onFiltersUpdate, isOpen, onToggle }) => {
       setConversationHistory(newHistory);
 
       let botResponseText;
-      
-      if (response.response) {
-        // Bot is asking for more information
+        if (response.type === "conversation" || response.response) {
+        // Bot is asking for more information or providing conversation
         botResponseText = response.response;
+        
+        // Clear previous suggestions when having a conversation
+        if (onSuggestionsUpdate) {
+          onSuggestionsUpdate([]);
+        }
+      } else if (response.type === "suggestion") {
+        // Bot is making suggestions with potential filters
+        botResponseText = response.response;
+        
+        // Apply filters if provided
+        if (response.filters) {
+          const extractedFilters = extractFiltersFromResponse(response);
+          if (Object.keys(extractedFilters).length > 0) {
+            onFiltersUpdate(extractedFilters);
+          }
+        }
+          // Highlight suggested items if provided
+        if (response.suggested_items && onSuggestionsUpdate) {
+          onSuggestionsUpdate(response.suggested_items);
+          
+          // Add a note about the filtering
+          if (response.suggested_items.length > 0) {
+            botResponseText += ` I've filtered the listings to show ${response.suggested_items.length} suggested items that match your needs.`;
+          }
+        }
       } else {
-        // Bot extracted filters, apply them and provide confirmation
+        // Fallback for old format
         const extractedFilters = extractFiltersFromResponse(response);
         
         if (Object.keys(extractedFilters).length > 0) {
@@ -74,7 +95,7 @@ const Chatbot = ({ onFiltersUpdate, isOpen, onToggle }) => {
           
           botResponseText = `Great! I've applied filters ${filterDescriptions.join(', ')}. You should see the updated results now. Need anything else?`;
         } else {
-          botResponseText = "I understand you're looking for something, but could you provide more specific details about what you need?";
+          botResponseText = response.response || "I understand you're looking for something, but could you provide more specific details about what you need?";
         }
       }
 
@@ -106,12 +127,11 @@ const Chatbot = ({ onFiltersUpdate, isOpen, onToggle }) => {
       handleSendMessage();
     }
   };
-
   const clearChat = () => {
     setMessages([
       {
         id: 1,
-        text: "Hi! I'm here to help you find the perfect items. What are you looking for today?",
+        text: "Hi! I'm your shopping assistant. I've analyzed all the available items in the marketplace. Tell me what you're looking for, and I'll help you find the perfect match or suggest similar alternatives!",
         isBot: true,
         timestamp: new Date()
       }
