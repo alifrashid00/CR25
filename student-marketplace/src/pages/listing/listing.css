@@ -743,86 +743,6 @@
     background-color: #d32f2f;
 }
 
-<<<<<<< HEAD
-.reviews-section {
-    margin-top: 2rem;
-    padding: 1rem;
-    background-color: #f9fafb;
-    border-radius: 8px;
-}
-
-.reviews-section h2 {
-    font-size: 1.25rem;
-    color: #1f2937;
-    margin-bottom: 1rem;
-}
-
-.reviews-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.review-card {
-    background-color: white;
-    padding: 1rem;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.reviewer-name {
-    font-weight: 500;
-    color: #1f2937;
-}
-
-.review-rating {
-    color: #f59e0b;
-    font-size: 1.125rem;
-}
-
-.review-text {
-    color: #4b5563;
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
-}
-
-.review-date {
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.no-reviews {
-    text-align: center;
-    color: #6b7280;
-    padding: 1rem;
-}
-
-.review-input {
-    margin: 1rem 0;
-}
-
-.review-input textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    resize: vertical;
-    font-family: inherit;
-    font-size: 0.875rem;
-}
-
-.review-input textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-=======
 /* Floating Ask Expert Button */
 .ask-expert-button {
     position: fixed;
@@ -868,5 +788,4 @@
 .ask-expert-button:hover::before {
     opacity: 1;
     transform: translateX(0);
->>>>>>> upstream/main
 }
