@@ -75,6 +75,8 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                     <button onClick={handleSend}>Send</button>
                 </div>
             </div>
+
+          
         </div>
 
     );
