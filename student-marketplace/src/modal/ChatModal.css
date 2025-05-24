@@ -84,28 +84,15 @@
     padding: 10px;
     border-top: 1px solid #e5e7eb;
     background: white;
+    gap: 0;
 }
 
-.chat-input-container input {
+.chat-input-container input[type="text"] {
     flex: 1;
     border: 1px solid #d1d5db;
     border-radius: 6px 0 0 6px;
     padding: 8px;
     font-size: 14px;
-}
-
-.location-btn {
-    border: none;
-    background-color: #10b981;
-    color: white;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 0;
-}
-
-.location-btn:hover {
-    background-color: #059669;
 }
 
 .chat-input-container button:last-child {
@@ -115,6 +102,126 @@
     padding: 8px 12px;
     border-radius: 0 6px 6px 0;
     cursor: pointer;
+}
+
+.chat-input-container button:last-child:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Image button styles */
+.image-btn {
+    border: none;
+    background-color: #8b5cf6;
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 0;
+}
+
+.image-btn:hover {
+    background-color: #7c3aed;
+}
+
+.image-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Image message styles */
+.image-message {
+    background: transparent !important;
+    padding: 4px !important;
+}
+
+.image-message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 250px;
+}
+
+.chat-image-thumbnail {
+    max-width: 100%;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-image-thumbnail:hover {
+    transform: scale(1.02);
+}
+
+.image-name {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.image-info {
+    font-size: 11px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Image preview modal */
+.image-preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.image-preview-container {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.image-preview-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.image-preview-close:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.image-preview-full {
+    max-width: 100%;
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
 }
 
 /* Location message styles */
