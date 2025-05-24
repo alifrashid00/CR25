@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import MessageButton from "../components/MessegeButton.jsx";
 
 export default function Dashboard() {
     const dummyListing = {
@@ -22,8 +21,6 @@ export default function Dashboard() {
             <div className="dashboard-content">
                 <p>Welcome to your dashboard!</p>
 
-                {/* Inject test data */}
-                <MessageButton listing={dummyListing} currentUser={dummyUser} />
             </div>
         </div>
     );

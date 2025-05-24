@@ -11,7 +11,7 @@ const MyListings = () => {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [chatListing, setChatListing] = useState(null); // ✅ NEW STATE
+    const [selectedListing, setSelectedListing] = useState(null);
 
     useEffect(() => {
         if (user) fetchMyListings();
@@ -79,7 +79,12 @@ const MyListings = () => {
                                 <div className="listing-actions">
                                     <button onClick={() => handleUpdate(listing.id)}>Edit</button>
                                     <button onClick={() => handleDelete(listing.id)}>Delete</button>
-                                    <button onClick={() => setChatListing(listing)}>View Chats</button> {/* ✅ NEW */}
+                                    <button
+                                        className="chat-button"
+                                        onClick={() => setSelectedListing(listing)}
+                                    >
+                                        View Chats
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -87,14 +92,16 @@ const MyListings = () => {
                 )}
             </div>
 
-            {/* ✅ CHAT LIST MODAL */}
-            {chatListing && (
-                <ChatListModal
-                    listing={chatListing}
-                    sellerId={user.uid}
-                    onClose={() => setChatListing(null)}
-                />
-            )}
+            {selectedListing && (() => {
+                console.log("Opening ChatListModal for:", selectedListing?.id);
+                return (
+                    <ChatListModal
+                        listing={selectedListing}
+                        sellerId={user.uid}
+                        onClose={() => setSelectedListing(null)}
+                    />
+                );
+            })()}
         </div>
     );
 };

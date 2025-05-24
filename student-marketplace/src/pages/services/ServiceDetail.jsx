@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getServiceById, incrementViewCount, updateProviderRating, deleteService } from '../../services/services';
 import './service-detail.css';
-import MessageButton from "../../components/MessegeButton.jsx";
-
+import MessageButton from "../../components/MessageButton.jsx";
 const ServiceDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
