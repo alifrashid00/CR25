@@ -6,6 +6,8 @@ import { processImage } from '../../services/storage';
 import imageCompression from 'browser-image-compression';
 import './services.css';
 import { getUserById } from '../../services/users';
+import { doc, getDoc, collection, query, getDocs, where } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const EditService = () => {
     const { id } = useParams();

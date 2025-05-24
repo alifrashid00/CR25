@@ -14,6 +14,7 @@ import {
     serverTimestamp,
 } from "firebase/firestore";
 import "./ChatModal.css";
+import LocationSelectionModal from "../components/LocationSelectionModal";
 
 // Deterministic conversation ID
 const getConversationId = (buyerId, sellerId, listingId) =>
@@ -26,6 +27,7 @@ export default function ChatModal({ listing, currentUser, onClose }) {
     const [sellerInfo, setSellerInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showLocationModal, setShowLocationModal] = useState(false);
     const messagesEndRef = useRef(null);
 
     // Improved scroll behavior with debounce
@@ -145,6 +147,68 @@ export default function ChatModal({ listing, currentUser, onClose }) {
         }
     };
 
+    const handleLocationsSelect = async (locations) => {
+        try {
+            const locationMessage = `📍 Suggested meeting locations:\n${locations.map((loc, index) => 
+                `${index + 1}. ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}`
+            ).join('\n')}`;
+            
+            // Add location message
+            await addDoc(collection(db, "messages"), {
+                conversationId,
+                senderId: currentUser.id,
+                content: locationMessage,
+                locations: locations,
+                timestamp: serverTimestamp(),
+                read: false,
+                type: 'locations'
+            });
+
+            // Update conversation
+            await updateDoc(doc(db, "conversations", conversationId), {
+                lastMessage: locationMessage,
+                updatedAt: serverTimestamp(),
+            });
+
+            setShowLocationModal(false);
+        } catch (err) {
+            console.error("Failed to send locations:", err);
+            setError("Failed to share locations. Please try again.");
+        }
+    };
+
+    const handleLocationAgree = async (messageId, locationIndex) => {
+        try {
+            const messageRef = doc(db, "messages", messageId);
+            const messageDoc = await getDoc(messageRef);
+            
+            if (!messageDoc.exists()) return;
+
+            const messageData = messageDoc.data();
+            const locations = messageData.locations || [];
+            
+            if (locationIndex >= 0 && locationIndex < locations.length) {
+                await updateDoc(messageRef, {
+                    agreedLocation: locations[locationIndex],
+                    agreedBy: currentUser.id,
+                    agreedAt: serverTimestamp()
+                });
+
+                // Update the listing with the agreed location
+                if (listing?.id) {
+                    await updateDoc(doc(db, "listings", listing.id), {
+                        meetingLocation: locations[locationIndex],
+                        meetingLocationAgreedBy: [currentUser.id, messageData.senderId],
+                        meetingLocationAgreedAt: serverTimestamp()
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Failed to agree to location:", err);
+            setError("Failed to confirm location. Please try again.");
+        }
+    };
+
     return (
         <div className="chat-modal-overlay">
             <div className="chat-modal">
@@ -153,7 +217,7 @@ export default function ChatModal({ listing, currentUser, onClose }) {
                         <img
                             src={
                                 sellerInfo?.profilePic
-                                    ? sellerInfo.profilePic  // Use the base64 image directly
+                                    ? sellerInfo.profilePic
                                     : "/default-avatar.png"
                             }
                             alt={`${sellerInfo?.firstName || "Seller"} ${sellerInfo?.lastName || ""}`}
@@ -166,7 +230,6 @@ export default function ChatModal({ listing, currentUser, onClose }) {
                     </div>
                     <button className="chat-close-btn" onClick={onClose}>×</button>
                 </div>
-
 
                 <div className="chat-body">
                     {error ? (
@@ -182,6 +245,46 @@ export default function ChatModal({ listing, currentUser, onClose }) {
                                 className={`chat-message ${msg.senderId === currentUser.id ? "sent" : "received"}`}
                             >
                                 <p>{msg.content}</p>
+                                {msg.type === 'locations' && (
+                                    <div className="locations-message">
+                                        {msg.locations.map((loc, index) => (
+                                            <div key={index} className="location-item">
+                                                <a
+                                                    href={`https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=15/${loc.lat}/${loc.lng}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="view-location-link"
+                                                >
+                                                    View Location {index + 1} on Map
+                                                </a>
+                                                {!msg.agreedLocation && msg.senderId !== currentUser.id && (
+                                                    <button
+                                                        onClick={() => handleLocationAgree(msg.id, index)}
+                                                        className="agree-location-btn"
+                                                    >
+                                                        Agree to Meet Here
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                        {msg.agreedLocation && (
+                                            <div className="location-agreed">
+                                                <strong>Agreed Meeting Location:</strong>
+                                                <a
+                                                    href={`https://www.openstreetmap.org/?mlat=${msg.agreedLocation.lat}&mlon=${msg.agreedLocation.lng}#map=15/${msg.agreedLocation.lat}/${msg.agreedLocation.lng}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="view-location-link"
+                                                >
+                                                    View Agreed Location on Map
+                                                </a>
+                                                <span>
+                                                    {msg.agreedBy === currentUser.id ? 'You agreed' : 'Other party agreed'} to meet here
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 <small>
                                     {msg.timestamp?.toLocaleTimeString([], {
                                         hour: "2-digit",
@@ -204,6 +307,13 @@ export default function ChatModal({ listing, currentUser, onClose }) {
                         disabled={loading}
                     />
                     <button
+                        className="location-btn"
+                        onClick={() => setShowLocationModal(true)}
+                        title="Share Locations"
+                    >
+                        📍
+                    </button>
+                    <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim() || loading}
                     >
@@ -211,6 +321,13 @@ export default function ChatModal({ listing, currentUser, onClose }) {
                     </button>
                 </div>
             </div>
+
+            {showLocationModal && (
+                <LocationSelectionModal
+                    onClose={() => setShowLocationModal(false)}
+                    onLocationsSelect={handleLocationsSelect}
+                />
+            )}
         </div>
     );
 }
