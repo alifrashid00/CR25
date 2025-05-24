@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
+import { createBid, getListingBids, getHighestBid } from '../../services/bids';
 import './listing-detail.css';
-import MessageButton from "../../components/MessageButton.jsx";
-import ExpertChat from "../../components/ExpertChat.jsx";
+import MessageButton from "../../components/MessageButton";
+import ExpertChat from "../../components/ExpertChat";
 
 import './listing.css';
 
@@ -18,6 +19,11 @@ const ListingDetail = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [rating, setRating] = useState(0);
     const [showRatingModal, setShowRatingModal] = useState(false);
+    const [bidAmount, setBidAmount] = useState('');
+    const [bids, setBids] = useState([]);
+    const [highestBid, setHighestBid] = useState(null);
+    const [bidError, setBidError] = useState('');
+    const [bidLoading, setBidLoading] = useState(false);
 
     const fetchListing = useCallback(async () => {
         try {
@@ -28,6 +34,16 @@ const ListingDetail = () => {
             
             // Increment view count
             await incrementViewCount(id);
+
+            // Fetch bids if this is a bidding listing
+            if (listingData.pricingType === 'bidding') {
+                const [bidsData, highestBidData] = await Promise.all([
+                    getListingBids(id),
+                    getHighestBid(id)
+                ]);
+                setBids(bidsData);
+                setHighestBid(highestBidData);
+            }
         } catch (error) {
             console.error('Error fetching listing:', error);
             setError('Failed to load listing. Please try again.');
@@ -39,6 +55,48 @@ const ListingDetail = () => {
     useEffect(() => {
         fetchListing();
     }, [fetchListing]);
+
+    const handleBidSubmit = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            setBidError('Please log in to place a bid');
+            return;
+        }
+
+        try {
+            setBidLoading(true);
+            setBidError('');
+            const amount = parseFloat(bidAmount);
+            
+            if (isNaN(amount) || amount <= 0) {
+                throw new Error('Please enter a valid bid amount');
+            }
+
+            if (highestBid && amount <= highestBid.amount) {
+                throw new Error(`Your bid must be higher than the current highest bid of ৳${highestBid.amount.toLocaleString()}`);
+            }
+
+            if (isOwner) {
+                throw new Error('You cannot bid on your own listing');
+            }
+
+            await createBid(id, user.uid, amount);
+            setBidAmount('');
+            
+            // Refresh bids
+            const [bidsData, highestBidData] = await Promise.all([
+                getListingBids(id),
+                getHighestBid(id)
+            ]);
+            setBids(bidsData);
+            setHighestBid(highestBidData);
+        } catch (error) {
+            console.error('Error placing bid:', error);
+            setBidError(error.message);
+        } finally {
+            setBidLoading(false);
+        }
+    };
 
     const handleRatingSubmit = async () => {
         try {
@@ -116,7 +174,52 @@ const ListingDetail = () => {
                         <p className="price">৳{listing.price.toLocaleString()}</p>
                     )}
                     {listing.pricingType === 'bidding' && (
-                        <p className="price">Open to Bids</p>
+                        <div className="bidding-section">
+                            <p className="price">
+                                {highestBid 
+                                    ? `Highest Bid: ৳${highestBid.amount.toLocaleString()}`
+                                    : 'No bids yet'}
+                            </p>
+                            {!isOwner && user && (
+                                <form onSubmit={handleBidSubmit} className="bid-form">
+                                    <div className="bid-input-group">
+                                        <input
+                                            type="number"
+                                            value={bidAmount}
+                                            onChange={(e) => setBidAmount(e.target.value)}
+                                            placeholder="Enter your bid amount"
+                                            min={highestBid ? highestBid.amount + 1 : 1}
+                                            step="1"
+                                            required
+                                            disabled={bidLoading}
+                                        />
+                                        <button 
+                                            type="submit" 
+                                            disabled={bidLoading}
+                                        >
+                                            {bidLoading ? 'Placing Bid...' : 'Place Bid'}
+                                        </button>
+                                    </div>
+                                    {bidError && <p className="bid-error">{bidError}</p>}
+                                </form>
+                            )}
+                            {bids.length > 0 && (
+                                <div className="bids-history">
+                                    <h3>Bid History</h3>
+                                    <div className="bids-list">
+                                        {bids.map(bid => (
+                                            <div key={bid.id} className="bid-item">
+                                                <span className="bidder-name">{bid.bidderName}</span>
+                                                <span className="bid-amount">৳{bid.amount.toLocaleString()}</span>
+                                                <span className="bid-time">
+                                                    {new Date(bid.createdAt?.toDate()).toLocaleString()}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
                     {listing.pricingType === 'negotiable' && (
                         <p className="price">Price Negotiable</p>
@@ -199,20 +302,11 @@ const ListingDetail = () => {
                                     )}
                                 </>
                             )}
-                            {user && (
-                                <button
-                                    className="rate-button"
-                                    onClick={() => setShowRatingModal(true)}
-                                >
-                                    Rate Seller
-                                </button>
-                            )}
                         </>
                     )}
                 </div>
             </div>
 
-            {/* Replace the old ask expert button with the new ExpertChat component */}
             <ExpertChat 
                 listing={listing}
                 onClose={() => {/* Handle close if needed */}}
