@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e303c546-82e0-4ffb-88c5-6df89cddec16" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/components/SignUp.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/components/SignUp.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/firebase.js" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/firebase.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/Dashboard.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +39,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\Alif\\AppData\\Local\\JetBrains\\WebStorm 2023.3.6\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -50,7 +52,7 @@
       <option name="presentableId" value="Default" />
       <updated>1748067931883</updated>
       <workItem from="1748067932915" duration="1874000" />
-      <workItem from="1748071366002" duration="1739000" />
+      <workItem from="1748071366002" duration="5462000" />
     </task>
     <servers />
   </component>
