@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 import LocationSelectionModal from '../components/LocationSelectionModal.jsx';
 import { getUserById } from '../services/users.js';
+import { processImage, validateChatImage } from '../services/storage.js';
 import './ChatModal.css'
 
 const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
@@ -20,7 +21,10 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
     const [showLocationModal, setShowLocationModal] = useState(false);
     const [singleLocationMode, setSingleLocationMode] = useState(false);
     const [pendingLocationConfirmations, setPendingLocationConfirmations] = useState({});
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedImagePreview, setSelectedImagePreview] = useState(null);
     const bottomRef = useRef();
+    const fileInputRef = useRef();
 
     useEffect(() => {
         const messagesRef = collection(db, 'conversations', conversationId, 'messages');
@@ -54,6 +58,62 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
 
         setNewMessage('');
         scrollToBottom();
+    };
+
+    const handleImageSelect = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            validateChatImage(file);
+            handleImageUpload(file);
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+    const handleImageUpload = async (file) => {
+        setIsUploading(true);
+        try {
+            // Check if user is authenticated
+            if (!currentUserId) {
+                throw new Error('You must be logged in to send images');
+            }
+
+            // Process the image to base64 (includes compression)
+            const base64Image = await processImage(file);
+            
+            // Send the image message with base64 data
+            const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+            await addDoc(messagesRef, {
+                senderId: currentUserId,
+                imageData: base64Image,
+                imageName: file.name,
+                imageSize: file.size,
+                imageType: file.type,
+                createdAt: serverTimestamp(),
+                type: 'image'
+            });
+
+            scrollToBottom();
+        } catch (error) {
+            console.error('Error processing image:', error);
+            alert('Failed to process image. Please try again.');
+        } finally {
+            setIsUploading(false);
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleImagePreview = (imageUrl) => {
+        setSelectedImagePreview(imageUrl);
+    };
+
+    const closeImagePreview = () => {
+        setSelectedImagePreview(null);
     };
 
     const handleLocationSelect = async (locations) => {
@@ -158,14 +218,14 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
         }
     };
 
-    const handleLocationClick = (messageId, locationData) => {
-        if (pendingLocationConfirmations[messageId]) return;
+    // const handleLocationClick = (messageId, locationData) => {
+    //     if (pendingLocationConfirmations[messageId]) return;
         
-        setPendingLocationConfirmations(prev => ({
-            ...prev,
-            [messageId]: locationData
-        }));
-    };
+    //     setPendingLocationConfirmations(prev => ({
+    //         ...prev,
+    //         [messageId]: locationData
+    //     }));
+    // };
 
     const confirmLocationSelection = (messageId) => {
         const selectedLocation = pendingLocationConfirmations[messageId];
@@ -182,6 +242,33 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
     };
 
     const renderMessage = (msg) => {
+        if (msg.type === 'image') {
+            return (
+                <div key={msg.id} className={`chat-message image-message ${msg.senderId === currentUserId ? 'sent' : 'received'}`}>
+                    <div className="image-message-content">
+                        <img 
+                            src={msg.imageData} 
+                            alt={msg.imageName || 'Shared image'}
+                            className="chat-image-thumbnail"
+                            onClick={() => handleImagePreview(msg.imageData)}
+                            onError={(e) => {
+                                e.target.src = '/default-service.jpg'; // fallback image
+                                e.target.alt = 'Failed to load image';
+                            }}
+                        />
+                        {msg.imageName && (
+                            <div className="image-name">{msg.imageName}</div>
+                        )}
+                        {msg.imageSize && (
+                            <div className="image-info">
+                                {(msg.imageSize / 1024).toFixed(1)} KB
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
         if (msg.type === 'location') {
             const isConfirmed = msg.status === 'confirmed';
             const isAgreed = msg.status === 'agreed' || msg.isAgreement;
@@ -293,7 +380,23 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                        disabled={isUploading}
                     />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageSelect}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                    />
+                    <button 
+                        className="image-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        title="Send image"
+                    >
+                        {isUploading ? '⏳' : '📷'}
+                    </button>
                     <button 
                         className="location-btn"
                         onClick={() => {
@@ -301,10 +404,13 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                             setShowLocationModal(true);
                         }}
                         title="Share location"
+                        disabled={isUploading}
                     >
                         📍
                     </button>
-                    <button onClick={handleSend}>Send</button>
+                    <button onClick={handleSend} disabled={isUploading}>
+                        {isUploading ? 'Uploading...' : 'Send'}
+                    </button>
                 </div>
             </div>
 
@@ -317,6 +423,19 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                     onLocationsSelect={handleLocationSelect}
                     singleLocationMode={singleLocationMode}
                 />
+            )}
+
+            {selectedImagePreview && (
+                <div className="image-preview-overlay" onClick={closeImagePreview}>
+                    <div className="image-preview-container" onClick={(e) => e.stopPropagation()}>
+                        <button className="image-preview-close" onClick={closeImagePreview}>✕</button>
+                        <img 
+                            src={selectedImagePreview} 
+                            alt="Full size preview" 
+                            className="image-preview-full"
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );
