@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthContext';
 import { getListings } from '../../services/listings';
+import Chatbot from '../../components/Chatbot';
 import './listing.css';
 
 const Listing = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
     const [allListings, setAllListings] = useState([]);
     const [filteredListings, setFilteredListings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,6 +20,8 @@ const Listing = () => {
         visibility: '',
         searchQuery: ''
     });
+    const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+    const [suggestedItems, setSuggestedItems] = useState([]);
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -107,6 +108,82 @@ const Listing = () => {
         };
         setFilters(emptyFilters);
         setFilteredListings(allListings);
+    };
+
+    const handleChatbotFilters = (chatbotFilters) => {
+        const updatedFilters = { ...filters, ...chatbotFilters };
+        setFilters(updatedFilters);
+        
+        // Apply the filters immediately
+        let filtered = [...allListings];
+
+        // Apply search filter
+        if (updatedFilters.searchQuery) {
+            const query = updatedFilters.searchQuery.toLowerCase();
+            filtered = filtered.filter(listing => 
+                listing.title.toLowerCase().includes(query) ||
+                listing.description.toLowerCase().includes(query)
+            );
+        }
+
+        // Apply category filter
+        if (updatedFilters.category) {
+            filtered = filtered.filter(listing => listing.category === updatedFilters.category);
+        }
+
+        // Apply condition filter
+        if (updatedFilters.condition) {
+            filtered = filtered.filter(listing => listing.condition === updatedFilters.condition);
+        }
+
+        // Apply pricing type filter
+        if (updatedFilters.pricingType) {
+            filtered = filtered.filter(listing => listing.pricingType === updatedFilters.pricingType);
+        }
+
+        // Apply visibility filter
+        if (updatedFilters.visibility) {
+            filtered = filtered.filter(listing => listing.visibility === updatedFilters.visibility);
+        }
+
+        // Apply price range filter
+        const minPrice = updatedFilters.minPrice ? Number(updatedFilters.minPrice) : 0;
+        const maxPrice = updatedFilters.maxPrice ? Number(updatedFilters.maxPrice) : Infinity;
+        
+        filtered = filtered.filter(listing => {
+            if (listing.pricingType !== 'fixed') return true;
+            const price = listing.price;
+            return price >= minPrice && price <= maxPrice;
+        });
+
+        setFilteredListings(filtered);
+    };
+
+    const handleSuggestionsUpdate = (suggestions) => {
+        setSuggestedItems(suggestions);
+        
+        // If suggestions are provided, filter listings to show only suggested items
+        if (suggestions && suggestions.length > 0) {
+            const suggestedListings = allListings.filter(listing => 
+                suggestions.includes(listing.id) || 
+                suggestions.includes(listing.title) ||
+                suggestions.some(suggestion => 
+                    listing.title.toLowerCase().includes(suggestion.toLowerCase()) ||
+                    listing.description?.toLowerCase().includes(suggestion.toLowerCase())
+                )
+            );
+            
+            // If we found suggested listings, show them; otherwise show current filtered results
+            if (suggestedListings.length > 0) {
+                setFilteredListings(suggestedListings);
+            }
+        }
+    };
+
+    const clearSuggestions = () => {
+        setSuggestedItems([]);
+        // Apply current filters to show all relevant listings
+        applyFilters();
     };
 
     if (loading) {
@@ -234,13 +311,30 @@ const Listing = () => {
             <div className="listings-content">
                 <div className="listings-header">
                     <h1>Discover Listings</h1>
-                    <button
-                        className="sell-button"
-                        onClick={() => navigate('/sell')}
-                    >
-                        Create New Listing
-                    </button>
+                    <div className="header-buttons">
+                        {suggestedItems.length > 0 && (
+                            <button
+                                className="show-all-button"
+                                onClick={clearSuggestions}
+                            >
+                                Show All Listings
+                            </button>
+                        )}
+                        <button
+                            className="sell-button"
+                            onClick={() => navigate('/sell')}
+                        >
+                            Create New Listing
+                        </button>
+                    </div>
                 </div>
+
+                {suggestedItems.length > 0 && (
+                    <div className="suggestions-info">
+                        <span className="suggestions-icon">🤖</span>
+                        Showing AI suggested items ({filteredListings.length} found)
+                    </div>
+                )}
 
                 <div className="listings-grid">
                     {error ? (
@@ -248,34 +342,49 @@ const Listing = () => {
                     ) : filteredListings.length === 0 ? (
                         <div className="no-listings">No listings found matching your criteria</div>
                     ) : (
-                        filteredListings.map(listing => (
-                            <div key={listing.id} className="listing-card" onClick={() => navigate(`/listing/${listing.id}`)}>
-                                <div className="listing-image">
-                                    <img src={listing.images[0]} alt={listing.title} />
-                                </div>
-                                <div className="listing-details">
-                                    <h3>{listing.title}</h3>
-                                    {listing.pricingType === 'fixed' && (
-                                        <p className="price">৳{listing.price.toLocaleString()}</p>
-                                    )}
-                                    {listing.pricingType === 'bidding' && (
-                                        <p className="price">Open to Bids</p>
-                                    )}
-                                    {listing.pricingType === 'negotiable' && (
-                                        <p className="price">Price Negotiable</p>
-                                    )}
-                                    <p className="condition">{listing.condition}</p>
-                                    <p className="university">{listing.university}</p>
-                                    <div className="seller-info">
-                                        <span>{listing.sellerName}</span>
-                                        <span className="rating">★ {listing.sellerRating || 'New'}</span>
+                        filteredListings.map(listing => {
+                            const isSuggested = suggestedItems.includes(listing.id) || suggestedItems.includes(listing.title);
+                            return (
+                                <div 
+                                    key={listing.id} 
+                                    className={`listing-card ${isSuggested ? 'suggested' : ''}`} 
+                                    onClick={() => navigate(`/listing/${listing.id}`)}
+                                >
+                                    <div className="listing-image">
+                                        <img src={listing.images[0]} alt={listing.title} />
+                                    </div>
+                                    <div className="listing-details">
+                                        <h3>{listing.title}</h3>
+                                        {listing.pricingType === 'fixed' && (
+                                            <p className="price">৳{listing.price.toLocaleString()}</p>
+                                        )}
+                                        {listing.pricingType === 'bidding' && (
+                                            <p className="price">Open to Bids</p>
+                                        )}
+                                        {listing.pricingType === 'negotiable' && (
+                                            <p className="price">Price Negotiable</p>
+                                        )}
+                                        <p className="condition">{listing.condition}</p>
+                                        <p className="university">{listing.university}</p>
+                                        <div className="seller-info">
+                                            <span>{listing.sellerName}</span>
+                                            <span className="rating">★ {listing.sellerRating || 'New'}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>
+            
+            <Chatbot
+                onFiltersUpdate={handleChatbotFilters}
+                isOpen={isChatbotOpen}
+                onToggle={() => setIsChatbotOpen(!isChatbotOpen)}
+                availableListings={allListings}
+                onSuggestionsUpdate={handleSuggestionsUpdate}
+            />
         </div>
     );
 };
