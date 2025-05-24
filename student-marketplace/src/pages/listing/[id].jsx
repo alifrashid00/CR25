@@ -239,14 +239,6 @@ const ListingDetail = () => {
                                     )}
                                 </>
                             )}
-                            {user && (
-                                <button
-                                    className="rate-button"
-                                    onClick={() => setShowRatingModal(true)}
-                                >
-                                    Rate Seller
-                                </button>
-                            )}
                         </>
                     )}
                 </div>
