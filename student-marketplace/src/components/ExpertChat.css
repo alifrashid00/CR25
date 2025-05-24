@@ -9,10 +9,10 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #2563eb;
+    background-color: #FF9900;
     color: white;
     border: none;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -23,8 +23,8 @@
 
 .expert-chat-button:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-    background-color: #1d4ed8;
+    box-shadow: 0 6px 16px rgba(255, 153, 0, 0.4);
+    background-color: #e88b00;
 }
 
 .expert-chat.expanded .expert-chat-button {
@@ -32,11 +32,6 @@
 }
 
 .expert-chat-content {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 400px;
-    max-width: 90vw;
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -50,12 +45,15 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    background-color: #232F3E;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom: 1px solid #2d3b4d;
 }
 
 .expert-chat-header h3 {
     margin: 0;
-    color: #1f2937;
+    color: white;
     font-size: 1.25rem;
 }
 
@@ -63,14 +61,15 @@
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: #6b7280;
+    color: white;
     cursor: pointer;
     padding: 0.25rem;
     line-height: 1;
+    transition: color 0.2s;
 }
 
 .close-button:hover {
-    color: #1f2937;
+    color: #FF9900;
 }
 
 .expert-chat-body {
@@ -106,4 +105,4 @@
         right: 1rem;
         bottom: 1rem;
     }
-} 
+}

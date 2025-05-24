@@ -148,17 +148,19 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    border: 1px solid #eee;
 }
 
 .listing-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-color: #FF9900;
 }
 
 /* Suggested item highlighting */
 .listing-card.suggested {
-    border: 2px solid #667eea;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    border: 2px solid #FF9900;
+    box-shadow: 0 4px 20px rgba(255, 153, 0, 0.3);
     position: relative;
 }
 
@@ -274,12 +276,12 @@
 }
 
 .search-button {
-    background-color: #4a90e2;
+    background-color: #FF9900;
     color: white;
 }
 
 .search-button:hover {
-    background-color: #357abd;
+    background-color: #e88b00;
 }
 
 .apply-filters-button {
@@ -602,7 +604,7 @@
 }
 
 .star-button.active {
-    color: #f59e0b;
+    color: #FF9900;
 }
 
 .modal-buttons {
@@ -631,13 +633,13 @@
 }
 
 .submit-button {
-    background-color: #2563eb;
+    background-color: #FF9900;
     color: white;
     border: none;
 }
 
 .submit-button:hover {
-    background-color: #1d4ed8;
+    background-color: #e88b00;
 }
 
 /* Responsive Design */
@@ -695,7 +697,7 @@
 .create-listing-button {
     display: inline-block;
     padding: 0.75rem 1.5rem;
-    background-color: #4CAF50;
+    background-color: #FF9900;
     color: white;
     text-decoration: none;
     border-radius: 6px;
@@ -704,7 +706,7 @@
 }
 
 .create-listing-button:hover {
-    background-color: #45a049;
+    background-color: #e88b00;
 }
 
 .listing-actions {
@@ -724,12 +726,12 @@
 }
 
 .edit-button {
-    background-color: #2196F3;
+    background-color: #232F3E;
     color: white;
 }
 
 .edit-button:hover {
-    background-color: #1976D2;
+    background-color: #2d3b4d;
 }
 
 .delete-button {

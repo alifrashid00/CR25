@@ -16,7 +16,7 @@
 }
 
 .profile-header h2 {
-    color: #333;
+    color: #232F3E;
     margin-bottom: 1rem;
 }
 
@@ -46,8 +46,9 @@
 }
 
 .form-group input:focus {
-    border-color: #4299e1;
+    border-color: #FF9900;
     outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.2);
 }
 
 .form-group select {
@@ -61,8 +62,9 @@
 }
 
 .form-group select:focus {
-    border-color: #4299e1;
+    border-color: #FF9900;
     outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.2);
 }
 
 .form-group select:disabled {
@@ -91,7 +93,7 @@
 }
 
 .profile-pic-dropzone:hover {
-    border-color: #4299e1;
+    border-color: #FF9900;
 }
 
 .upload-placeholder {
@@ -130,7 +132,7 @@
 
 .submit-button {
     flex: 1;
-    background-color: #4299e1;
+    background-color: #FF9900;
     color: white;
     padding: 0.75rem;
     border: none;
@@ -142,7 +144,7 @@
 }
 
 .submit-button:hover {
-    background-color: #3182ce;
+    background-color: #e88b00;
 }
 
 .submit-button:disabled {
@@ -174,7 +176,7 @@
 }
 
 .edit-button {
-    background-color: #4299e1;
+    background-color: #FF9900;
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
@@ -185,7 +187,7 @@
 }
 
 .edit-button:hover {
-    background-color: #3182ce;
+    background-color: #e88b00;
 }
 
 input:disabled {

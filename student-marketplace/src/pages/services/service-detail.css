@@ -21,7 +21,7 @@
 
 .service-title-section h1 {
     margin: 0 0 1rem 0;
-    color: #333;
+    color: #232F3E;
     font-size: 2rem;
 }
 
@@ -33,10 +33,11 @@
 }
 
 .category {
-    background: #e9ecef;
+    background: #f8f9fa;
     padding: 0.25rem 0.75rem;
     border-radius: 15px;
-    color: #495057;
+    color: #232F3E;
+    border: 1px solid #e9ecef;
 }
 
 .service-price {
@@ -184,22 +185,21 @@
 }
 
 .contact-button {
-    background-color: #4a90e2;
+    background-color: #FF9900;
     color: white;
 }
 
 .contact-button:hover {
-    background-color: #357abd;
+    background-color: #e88b00;
 }
 
 .rate-button {
-    background-color: #f8f9fa;
-    color: #333;
-    border: 1px solid #ddd;
+    background-color: #232F3E;
+    color: white;
 }
 
 .rate-button:hover {
-    background-color: #e9ecef;
+    background-color: #2d3b4d;
 }
 
 .contact-modal,
@@ -261,7 +261,7 @@
 }
 
 .star.active {
-    color: #ffc107;
+    color: #FF9900;
 }
 
 .rating-actions {
@@ -271,7 +271,7 @@
 }
 
 .submit-rating-button {
-    background-color: #4CAF50;
+    background-color: #FF9900;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -282,7 +282,7 @@
 }
 
 .submit-rating-button:hover {
-    background-color: #45a049;
+    background-color: #e88b00;
 }
 
 .submit-rating-button:disabled {
@@ -338,4 +338,4 @@
     .rate-button {
         flex: 1;
     }
-} 
+}
