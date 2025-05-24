@@ -14,6 +14,7 @@ const SignUp = () => {
         studentId: "",
         phoneNumber: "",
         role: "student",
+        dateOfBirth: ""
     });
     const [previewPic, setPreviewPic] = useState(null);
     const [error, setError] = useState("");
@@ -163,6 +164,18 @@ const SignUp = () => {
                         id="lastName"
                         name="lastName"
                         value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="dateOfBirth">Date of Birth</label>
+                    <input
+                        type="date"
+                        id="dateOfBirth"
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth}
                         onChange={handleChange}
                         required
                     />
