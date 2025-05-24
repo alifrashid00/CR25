@@ -8,6 +8,7 @@ import Services from "./pages/services/services.jsx";
 import OfferServices from "./pages/services/offer-services.jsx";
 import Sell from "./pages/sell/sell.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
+import Suspended from "./pages/Suspended.jsx";
 import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import ServiceDetail from './pages/services/ServiceDetail';
 import Sidebar from './components/Sidebar';
@@ -34,11 +35,11 @@ function App() {
     return (
         <Router>
             <Routes>
-                {/* Public routes without sidebar */}
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                {/* Public routes without sidebar */}                <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
+                <Route path="/suspended" element={<Suspended />} />
                 
                 {/* Protected Routes with sidebar */}
                 <Route 

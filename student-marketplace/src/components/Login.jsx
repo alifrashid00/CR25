@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import "./login.css";
 
 const Login = () => {
@@ -18,6 +20,18 @@ const Login = () => {
         try {
             const auth = getAuth();
             await signInWithEmailAndPassword(auth, email, password);
+            
+            // Check if user is suspended
+            const userDocRef = doc(db, "users", email);
+            const userDocSnap = await getDoc(userDocRef);
+            
+            if (userDocSnap.exists() && userDocSnap.data().suspended) {
+                // Sign out the user if they are suspended
+                await auth.signOut();
+                navigate("/suspended");
+                return;
+            }
+
             navigate("/dashboard");
         } catch (err) {
             setError(err.message);
