@@ -89,7 +89,10 @@ Description: ${listing.description}`
                 <div className="expert-chat-content">
                     <div className="expert-chat-header">
                         <h3>Expert Analysis</h3>
-                        <button className="close-button" onClick={onClose}>×</button>
+                        <button className="close-button" onClick={() => {
+                            setIsExpanded(false);
+                            if (onClose) onClose();
+                        }}>×</button>
                     </div>
                     
                     <div className="expert-chat-body">
