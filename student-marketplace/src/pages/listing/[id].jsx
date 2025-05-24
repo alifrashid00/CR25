@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
-import './listing.css';
+import './listing-detail.css';
 import MessageButton from "../../components/MessegeButton.jsx";
 
 const ListingDetail = () => {
@@ -16,11 +16,7 @@ const ListingDetail = () => {
     const [rating, setRating] = useState(0);
     const [showRatingModal, setShowRatingModal] = useState(false);
 
-    useEffect(() => {
-        fetchListing();
-    }, [id]);
-
-    const fetchListing = async () => {
+    const fetchListing = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -35,7 +31,11 @@ const ListingDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchListing();
+    }, [fetchListing]);
 
     const handleRatingSubmit = async () => {
         try {
@@ -70,6 +70,12 @@ const ListingDetail = () => {
                 setError('Failed to delete listing. Please try again.');
             }
         }
+    };
+
+    // Add function to handle expert button click
+    const handleAskExpert = () => {
+        // TODO: Implement expert chat functionality
+        console.log('Ask expert clicked');
     };
 
     if (loading) {
@@ -197,6 +203,15 @@ const ListingDetail = () => {
                 </div>
             </div>
 
+            {/* Add the floating Ask Expert button */}
+            <button 
+                className="ask-expert-button"
+                onClick={handleAskExpert}
+                aria-label="Ask Expert"
+            >
+                👨‍🎓
+            </button>
+
             {showRatingModal && (
                 <div className="modal-overlay">
                     <div className="rating-modal">
@@ -233,4 +248,4 @@ const ListingDetail = () => {
     );
 };
 
-export default ListingDetail; 
+export default ListingDetail;
