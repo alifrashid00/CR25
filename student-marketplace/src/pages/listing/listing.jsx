@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthContext';
 import { getListings } from '../../services/listings';
+import Chatbot from '../../components/Chatbot';
 import './listing.css';
 
 const Listing = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
     const [allListings, setAllListings] = useState([]);
     const [filteredListings, setFilteredListings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,6 +20,7 @@ const Listing = () => {
         visibility: '',
         searchQuery: ''
     });
+    const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -107,6 +107,55 @@ const Listing = () => {
         };
         setFilters(emptyFilters);
         setFilteredListings(allListings);
+    };
+
+    const handleChatbotFilters = (chatbotFilters) => {
+        const updatedFilters = { ...filters, ...chatbotFilters };
+        setFilters(updatedFilters);
+        
+        // Apply the filters immediately
+        let filtered = [...allListings];
+
+        // Apply search filter
+        if (updatedFilters.searchQuery) {
+            const query = updatedFilters.searchQuery.toLowerCase();
+            filtered = filtered.filter(listing => 
+                listing.title.toLowerCase().includes(query) ||
+                listing.description.toLowerCase().includes(query)
+            );
+        }
+
+        // Apply category filter
+        if (updatedFilters.category) {
+            filtered = filtered.filter(listing => listing.category === updatedFilters.category);
+        }
+
+        // Apply condition filter
+        if (updatedFilters.condition) {
+            filtered = filtered.filter(listing => listing.condition === updatedFilters.condition);
+        }
+
+        // Apply pricing type filter
+        if (updatedFilters.pricingType) {
+            filtered = filtered.filter(listing => listing.pricingType === updatedFilters.pricingType);
+        }
+
+        // Apply visibility filter
+        if (updatedFilters.visibility) {
+            filtered = filtered.filter(listing => listing.visibility === updatedFilters.visibility);
+        }
+
+        // Apply price range filter
+        const minPrice = updatedFilters.minPrice ? Number(updatedFilters.minPrice) : 0;
+        const maxPrice = updatedFilters.maxPrice ? Number(updatedFilters.maxPrice) : Infinity;
+        
+        filtered = filtered.filter(listing => {
+            if (listing.pricingType !== 'fixed') return true;
+            const price = listing.price;
+            return price >= minPrice && price <= maxPrice;
+        });
+
+        setFilteredListings(filtered);
     };
 
     if (loading) {
@@ -276,6 +325,12 @@ const Listing = () => {
                     )}
                 </div>
             </div>
+            
+            <Chatbot
+                onFiltersUpdate={handleChatbotFilters}
+                isOpen={isChatbotOpen}
+                onToggle={() => setIsChatbotOpen(!isChatbotOpen)}
+            />
         </div>
     );
 };
