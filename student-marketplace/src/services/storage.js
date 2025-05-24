@@ -60,6 +60,12 @@ export const processMultipleImages = async (files) => {
 // Upload a single image
 export const uploadImage = async (file, path) => {
     try {
+        // Check if user is authenticated
+        const { auth } = await import('../firebase');
+        if (!auth.currentUser) {
+            throw new Error('You must be logged in to upload images');
+        }
+
         // Compress image before upload
         const compressedFile = await compressImage(file);
         
@@ -80,6 +86,8 @@ export const uploadImage = async (file, path) => {
             throw new Error('Upload was canceled.');
         } else if (error.code === 'storage/unknown') {
             throw new Error('An unknown error occurred while uploading the image.');
+        } else if (error.message.includes('CORS')) {
+            throw new Error('Network error. Please check your internet connection and try again.');
         }
         throw error;
     }
@@ -106,6 +114,22 @@ export const generateListingImagePath = (userId, listingId, fileName) => {
     return `listings/${userId}/${listingId}/${Date.now()}_${fileName}`;
 };
 
+// Validate image file for chat (more restrictive for base64 storage)
+export const validateChatImage = (file) => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxSize = 1 * 1024 * 1024; // 1MB limit for base64 storage in Firestore
+
+    if (!validTypes.includes(file.type)) {
+        throw new Error('Invalid file type. Please upload a JPEG, PNG, or WebP image.');
+    }
+
+    if (file.size > maxSize) {
+        throw new Error('File size too large. Maximum size is 1MB for chat images.');
+    }
+
+    return true;
+};
+
 // Validate image file
 export const validateImage = (file) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -120,4 +144,4 @@ export const validateImage = (file) => {
     }
 
     return true;
-}; 
+};
