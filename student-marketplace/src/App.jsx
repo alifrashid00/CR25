@@ -12,6 +12,7 @@ import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import ServiceDetail from './pages/services/ServiceDetail';
 import Sidebar from './components/Sidebar';
 import Profile from "./pages/profile/Profile.jsx";
+import ManageStudents from "./pages/admin/ManageStudents.jsx";
 import MyListings from "./pages/listing/MyListings.jsx";
 import MyServices from "./pages/services/MyServices.jsx";
 import EditListing from "./pages/listing/EditListing.jsx";
@@ -109,8 +110,7 @@ function App() {
                             </Layout>
                         </RoleBasedRoute>
                     } 
-                />
-                <Route 
+                />                <Route 
                     path="/profile" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
@@ -119,9 +119,19 @@ function App() {
                             </Layout>
                         </RoleBasedRoute>
                     }
-                    />
+                />
+                <Route 
+                    path="/manage-students" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["admin"]}>
+                            <Layout>
+                                <ManageStudents />
+                            </Layout>
+                        </RoleBasedRoute>
+                    }
+                />
                 <Route    
-                    path="/my-listings" 
+                    path="/my-listings"
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
                             <Layout>
