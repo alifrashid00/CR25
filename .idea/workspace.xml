@@ -6,8 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="e303c546-82e0-4ffb-88c5-6df89cddec16" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/[id].jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/[id].jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing-detail.css" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing-detail.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/MyListings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/MyListings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.css" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

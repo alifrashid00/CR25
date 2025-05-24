@@ -1,0 +1,232 @@
+/* Bid Management Styles */
+.bid-management-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bid-management-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.bid-management-header h2 {
+    color: #1f2937;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.bid-management-header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.bid-management-loading {
+    text-align: center;
+    padding: 4rem;
+    font-size: 1.2rem;
+    color: #6b7280;
+}
+
+.error-message {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #fecaca;
+}
+
+.no-bids {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #d1d5db;
+}
+
+.no-bids h3 {
+    color: #374151;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-bids p {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.bids-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bid-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bid-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.bid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.listing-title {
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.bid-status {
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.05);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bid-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+}
+
+.bid-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.bidder-info,
+.bid-amount,
+.bid-date {
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.bid-amount {
+    font-size: 1.1rem;
+    color: #059669;
+    font-weight: 600;
+}
+
+.bid-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.accept-btn,
+.reject-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+}
+
+.accept-btn {
+    background: #10b981;
+    color: white;
+}
+
+.accept-btn:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.reject-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.reject-btn:hover:not(:disabled) {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.accept-btn:disabled,
+.reject-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.accepted-info,
+.rejected-info {
+    display: flex;
+    align-items: center;
+}
+
+.accepted-text {
+    color: #059669;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.rejected-text {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bid-management-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .bid-management-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .bid-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .bid-details {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .bid-actions {
+        justify-content: stretch;
+    }
+
+    .accept-btn,
+    .reject-btn {
+        flex: 1;
+        min-width: auto;
+    }
+}
