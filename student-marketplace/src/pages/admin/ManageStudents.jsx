@@ -68,19 +68,20 @@ const ManageStudents = () => {
         }
     };
 
-    const handleMakeAdmin = async (studentId, currentRole) => {
+    const handleMakeAdmin = async (studentId, isCurrentlyCoAdmin) => {
         try {
-            const newRole = currentRole === 'student' ? 'admin' : 'student';
             await updateDoc(doc(db, "users", studentId), {
-                role: newRole
+                isCoAdmin: !isCurrentlyCoAdmin
             });
 
-            if (newRole === 'admin') {
-                setStudents(students.filter(student => student.id !== studentId));
-            }
+            setStudents(students.map(student => 
+                student.id === studentId 
+                    ? {...student, isCoAdmin: !isCurrentlyCoAdmin}
+                    : student
+            ));
         } catch (err) {
-            console.error('Error updating student role:', err);
-            alert('Failed to update student role. Please try again.');
+            console.error('Error updating co-admin status:', err);
+            alert('Failed to update co-admin status. Please try again.');
         }
     };
 
@@ -142,7 +143,8 @@ const ManageStudents = () => {
                             </th>
                             <th onClick={() => handleSort('department')}>
                                 Department {sortConfig.key === 'department' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                            </th>                            <th onClick={() => handleSort('yearOfStudy')}>
+                            </th>
+                            <th onClick={() => handleSort('yearOfStudy')}>
                                 Year {sortConfig.key === 'yearOfStudy' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                             </th>
                             <th>Actions</th>
@@ -152,7 +154,8 @@ const ManageStudents = () => {
                         {filteredAndSortedStudents.map((student) => (
                             <tr key={student.id}>
                                 <td>{`${student.firstName} ${student.lastName}`}</td>
-                                <td>{student.email}</td>                                <td>{student.university}</td>
+                                <td>{student.email}</td>
+                                <td>{student.university}</td>
                                 <td>{student.department}</td>
                                 <td>{student.yearOfStudy}</td>
                                 <td className="action-buttons">
@@ -163,10 +166,10 @@ const ManageStudents = () => {
                                         {student.suspended ? 'Unsuspend' : 'Suspend'}
                                     </button>
                                     <button
-                                        className="admin-button"
-                                        onClick={() => handleMakeAdmin(student.id, student.role)}
+                                        className={`admin-button ${student.isCoAdmin ? 'revoke' : ''}`}
+                                        onClick={() => handleMakeAdmin(student.id, student.isCoAdmin)}
                                     >
-                                        Make Admin
+                                        {student.isCoAdmin ? 'Revoke Co-Admin' : 'Make Co-Admin'}
                                     </button>
                                 </td>
                             </tr>

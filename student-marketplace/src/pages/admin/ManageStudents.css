@@ -115,6 +115,14 @@
     background-color: #4f46e5;
 }
 
+.admin-button.revoke {
+    background-color: #f43f5e;
+}
+
+.admin-button.revoke:hover {
+    background-color: #e11d48;
+}
+
 .loading {
     text-align: center;
     color: #6b7280;
