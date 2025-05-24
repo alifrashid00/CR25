@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListings, deleteListing } from '../../services/listings';
+import ChatListModal from "../../modal/ChatListModal.jsx";
 import './listing.css';
 
 const MyListings = () => {
@@ -10,11 +11,10 @@ const MyListings = () => {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [chatListing, setChatListing] = useState(null); // ✅ NEW STATE
 
     useEffect(() => {
-        if (user) {
-            fetchMyListings();
-        }
+        if (user) fetchMyListings();
     }, [user]);
 
     const fetchMyListings = async () => {
@@ -31,9 +31,7 @@ const MyListings = () => {
         }
     };
 
-    const handleUpdate = (listingId) => {
-        navigate(`/listing/${listingId}/edit`);
-    };
+    const handleUpdate = (listingId) => navigate(`/listing/${listingId}/edit`);
 
     const handleDelete = async (listingId) => {
         if (window.confirm('Are you sure you want to delete this listing?')) {
@@ -71,36 +69,32 @@ const MyListings = () => {
                             </div>
                             <div className="listing-details">
                                 <h3>{listing.title}</h3>
-                                {listing.pricingType === 'fixed' && (
-                                    <p className="price">৳{listing.price?.toLocaleString()}</p>
-                                )}
-                                {listing.pricingType === 'bidding' && (
-                                    <p className="price">Open to Bids</p>
-                                )}
-                                {listing.pricingType === 'negotiable' && (
-                                    <p className="price">Price Negotiable</p>
-                                )}
+                                <p className="price">
+                                    {listing.pricingType === 'fixed' && `৳${listing.price?.toLocaleString()}`}
+                                    {listing.pricingType === 'bidding' && 'Open to Bids'}
+                                    {listing.pricingType === 'negotiable' && 'Price Negotiable'}
+                                </p>
                                 <p className="condition">{listing.condition}</p>
                                 <p className="university">{listing.university}</p>
                                 <div className="listing-actions">
-                                    <button 
-                                        className="edit-button"
-                                        onClick={() => handleUpdate(listing.id)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button 
-                                        className="delete-button"
-                                        onClick={() => handleDelete(listing.id)}
-                                    >
-                                        Delete
-                                    </button>
+                                    <button onClick={() => handleUpdate(listing.id)}>Edit</button>
+                                    <button onClick={() => handleDelete(listing.id)}>Delete</button>
+                                    <button onClick={() => setChatListing(listing)}>View Chats</button> {/* ✅ NEW */}
                                 </div>
                             </div>
                         </div>
                     ))
                 )}
             </div>
+
+            {/* ✅ CHAT LIST MODAL */}
+            {chatListing && (
+                <ChatListModal
+                    listing={chatListing}
+                    sellerId={user.uid}
+                    onClose={() => setChatListing(null)}
+                />
+            )}
         </div>
     );
 };
