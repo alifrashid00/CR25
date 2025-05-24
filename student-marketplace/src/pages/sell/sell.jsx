@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { createListing } from '../../services/listings';
 import { processMultipleImages, validateImage } from '../../services/storage';
+import Estimator from '../../components/Estimator';
 import imageCompression from 'browser-image-compression'; // Import the library
 import './sell.css';
 
@@ -137,6 +138,14 @@ const Sell = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEstimate = (estimation) => {
+        setFormData(prev => ({
+            ...prev,
+            condition: estimation.condition.toLowerCase(),
+            price: estimation.price.toString()
+        }));
     };
 
     return (
@@ -292,6 +301,12 @@ const Sell = () => {
                     {loading ? 'Creating Listing...' : 'Create Listing'}
                 </button>
             </form>
+            <Estimator
+                title={formData.title}
+                description={formData.description}
+                images={formData.images}
+                onEstimate={handleEstimate}
+            />
         </div>
     );
 };
