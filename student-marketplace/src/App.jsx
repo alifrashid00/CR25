@@ -52,7 +52,7 @@ function App() {
                     path="/listing/:id" 
                     element={
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
-                            <Sell />
+                            <ListingDetail />
                         </RoleBasedRoute>
                     } 
                 />
