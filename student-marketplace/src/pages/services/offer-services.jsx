@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { createService } from '../../services/services';
+import { processImage } from '../../services/storage';
+import imageCompression from 'browser-image-compression'; // Import explicitly
 import './offer-services.css';
 
 const OfferServices = () => {
@@ -9,6 +11,7 @@ const OfferServices = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [imageError, setImageError] = useState(''); // Add state for image errors
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -18,7 +21,7 @@ const OfferServices = () => {
         hourlyRate: '',
         availability: '',
         university: '',
-        profileImage: ''
+        profileImage: null // Changed from string to null to store File object
     });
 
     const handleChange = (e) => {
@@ -26,6 +29,37 @@ const OfferServices = () => {
         setFormData(prev => ({
             ...prev,
             [name]: value
+        }));
+    };
+
+    // Add handler for file input
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        
+        if (!file) {
+            setFormData(prev => ({
+                ...prev,
+                profileImage: null
+            }));
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            setImageError('Please upload an image file (JPEG, PNG, etc.)');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            setImageError('Image size should be less than 5MB');
+            return;
+        }
+
+        setImageError('');
+        setFormData(prev => ({
+            ...prev,
+            profileImage: file
         }));
     };
 
@@ -43,15 +77,37 @@ const OfferServices = () => {
             // Convert skills string to array
             const skillsArray = formData.skills.split(',').map(skill => skill.trim());
 
+            // Process image if one was selected
+            let profileImageData = '';
+            if (formData.profileImage) {
+                // Compress the image first
+                try {
+                    const options = {
+                        maxSizeMB: 0.5, // Max size in MB
+                        maxWidthOrHeight: 1000, // Max width or height
+                        useWebWorker: true,
+                    };
+                    const compressedFile = await imageCompression(formData.profileImage, options);
+                    profileImageData = await processImage(compressedFile);
+                } catch (compressionError) {
+                    console.error('Error compressing image:', compressionError);
+                    // If compression fails, try with the original
+                    profileImageData = await processImage(formData.profileImage);
+                }
+            }
+
             const serviceData = {
                 ...formData,
                 skills: skillsArray,
                 hourlyRate: Number(formData.hourlyRate),
                 providerName: user.displayName || 'Anonymous',
                 providerEmail: user.email,
-                providerImage: user.photoURL || '',
+                providerImage: profileImageData || user.photoURL || '',
                 status: 'active'
             };
+
+            // Remove the File object before sending to Firestore
+            delete serviceData.profileImage;
 
             await createService(serviceData, user.uid);
             navigate('/services');
@@ -192,19 +248,24 @@ const OfferServices = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="profileImage">Profile Image URL</label>
+                        <label htmlFor="profileImage">Profile Image (Optional)</label>
                         <input
-                            type="url"
+                            type="file"
                             id="profileImage"
                             name="profileImage"
-                            value={formData.profileImage}
-                            onChange={handleChange}
-                            placeholder="Enter image URL (optional)"
+                            onChange={handleImageUpload}
+                            accept="image/*"
                         />
+                        {imageError && <div className="error-message">{imageError}</div>}
+                        <small>Optional. Max size: 5MB. Recommended dimensions: 500x500px</small>
                     </div>
 
-                    <button type="submit" className="submit-button" disabled={loading}>
-                        {loading ? 'Creating Service...' : 'Offer Service'}
+                    <button 
+                        type="submit" 
+                        className="submit-button"
+                        disabled={loading}
+                    >
+                        {loading ? 'Creating Service...' : 'Create Service'}
                     </button>
                 </form>
             </div>
@@ -212,4 +273,4 @@ const OfferServices = () => {
     );
 };
 
-export default OfferServices; 
+export default OfferServices;
