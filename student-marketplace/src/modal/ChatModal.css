@@ -131,6 +131,11 @@
     border-left: 4px solid #3b82f6;
 }
 
+.location-message.agreed {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-left: 4px solid #10b981;
+}
+
 .location-message-content {
     display: flex;
     flex-direction: column;
@@ -160,7 +165,7 @@
     text-decoration: underline;
 }
 
-.confirmed-status {
+.confirmed-status, .agreed-status {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -175,8 +180,66 @@
     font-weight: 600;
 }
 
+.agreed-badge {
+    background: #059669;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    animation: pulse 2s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
 .location-actions {
     margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.resend-location-btn {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.resend-location-btn:hover {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+.counter-proposal-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.counter-proposal-btn:hover {
+    background: #d97706;
+    transform: translateY(-1px);
 }
 
 .confirm-location-btn {
