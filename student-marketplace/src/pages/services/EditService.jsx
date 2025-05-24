@@ -20,7 +20,7 @@ const EditService = () => {
         skills: '',
         skillLevel: 'beginner',
         availability: 'part-time',
-        profileImage: ''
+        providerImage: '' // Changed from profileImage to providerImage
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -45,10 +45,10 @@ const EditService = () => {
                 title: service.title,
                 description: service.description,
                 hourlyRate: service.hourlyRate,
-                skills: service.skills.join(', '),
+                skills: service.skills.join(', '),  
                 skillLevel: service.skillLevel,
                 availability: service.availability,
-                profileImage: ''
+                providerImage: '' // Changed from profileImage to providerImage
             });
         } catch (error) {
             console.error('Error fetching service:', error);
@@ -85,7 +85,7 @@ const EditService = () => {
 
             setFormData(prev => ({
                 ...prev,
-                profileImage: compressedFile
+                providerImage: compressedFile // Changed from profileImage to providerImage
             }));
         } catch (error) {
             console.error('Error processing image:', error);
@@ -111,25 +111,25 @@ const EditService = () => {
                 .filter(skill => skill.length > 0);
 
             // Process image if one was selected
-            let profileImageData = service?.profileImage || '';
-            if (formData.profileImage instanceof File) {
-                profileImageData = await processImage(formData.profileImage);
-            } else if (typeof formData.profileImage === 'string' && formData.profileImage) {
-                profileImageData = formData.profileImage;
+            let providerImageData = service?.providerImage || ''; // Changed from profileImage to providerImage
+            if (formData.providerImage instanceof File) { // Changed from profileImage to providerImage
+                providerImageData = await processImage(formData.providerImage); // Changed from profileImage to providerImage
+            } else if (typeof formData.providerImage === 'string' && formData.providerImage) { // Changed from profileImage to providerImage
+                providerImageData = formData.providerImage; // Changed from profileImage to providerImage
             }
 
             const serviceData = {
                 ...formData,
                 skills: skillsArray,
                 hourlyRate: Number(formData.hourlyRate),
-                profileImage: profileImageData,
+                providerImage: providerImageData, // Changed from profileImage to providerImage
                 updatedAt: new Date(),
                 userId: user.uid // Ensure userId is included
             };
 
             // Remove the File or Blob object before sending to Firestore
-            if (serviceData.profileImage instanceof File || serviceData.profileImage instanceof Blob) {
-                delete serviceData.profileImage;
+            if (serviceData.providerImage instanceof File || serviceData.providerImage instanceof Blob) { // Changed from profileImage to providerImage
+                delete serviceData.providerImage; // Changed from profileImage to providerImage
             }
 
             await updateService(id, serviceData);
@@ -235,10 +235,10 @@ const EditService = () => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="profileImage">Profile Image</label>
+                    <label htmlFor="providerImage">Profile Image</label>
                     <input
                         type="file"
-                        id="profileImage"
+                        id="providerImage"
                         accept="image/*"
                         onChange={handleImageChange}
                         className="image-input"
@@ -254,4 +254,4 @@ const EditService = () => {
     );
 };
 
-export default EditService; 
+export default EditService;

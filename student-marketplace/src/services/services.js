@@ -27,6 +27,9 @@ export const createService = async (serviceData, userId) => {
     try {
         let providerName = 'Anonymous';
         let providerEmail = '';
+        let providerImage = '';
+        let providerRating = 0;
+        let totalRatings = 0;
 
         try {
             const user = await getUserById(userId);
@@ -34,6 +37,9 @@ export const createService = async (serviceData, userId) => {
                 ? `${user.firstName} ${user.lastName}`
                 : user.displayName || 'Anonymous';
             providerEmail = user.email || '';
+            providerImage = user.photoURL || '';
+            providerRating = user.rating || 0;
+            totalRatings = user.totalRatings || 0;
         } catch (error) {
             console.error('Error fetching user data:', error);
         }
@@ -43,11 +49,12 @@ export const createService = async (serviceData, userId) => {
             userId,
             providerName,
             providerEmail,
+            providerImage,
+            providerRating,
+            totalRatings,
             createdAt: serverTimestamp(),
             status: 'active',
-            views: 0,
-            providerRating: 0,
-            totalRatings: 0
+            views: 0
         };
 
         const docRef = await addDoc(collection(db, SERVICES_COLLECTION), serviceWithMetadata);
@@ -239,4 +246,4 @@ export const updateProviderRating = async (serviceId, rating) => {
         console.error('Error updating provider rating:', error);
         throw error;
     }
-}; 
+};

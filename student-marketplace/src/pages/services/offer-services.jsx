@@ -21,7 +21,7 @@ const OfferServices = () => {
         hourlyRate: '',
         availability: '',
         university: '',
-        profileImage: null // Changed from string to null to store File object
+        providerImage: null // Store File object for provider image
     });
 
     const handleChange = (e) => {
@@ -39,7 +39,7 @@ const OfferServices = () => {
         if (!file) {
             setFormData(prev => ({
                 ...prev,
-                profileImage: null
+                providerImage: null
             }));
             return;
         }
@@ -59,7 +59,7 @@ const OfferServices = () => {
         setImageError('');
         setFormData(prev => ({
             ...prev,
-            profileImage: file
+            providerImage: file
         }));
     };
 
@@ -77,9 +77,17 @@ const OfferServices = () => {
             // Convert skills string to array
             const skillsArray = formData.skills.split(',').map(skill => skill.trim());
 
+            const serviceData = {
+                ...formData,
+                skills: skillsArray,
+                hourlyRate: Number(formData.hourlyRate),
+                providerName: user.displayName || 'Anonymous',
+                providerEmail: user.email,
+                status: 'active'
+            };
+
             // Process image if one was selected
-            let profileImageData = '';
-            if (formData.profileImage) {
+            if (formData.providerImage) {
                 // Compress the image first
                 try {
                     const options = {
@@ -87,29 +95,24 @@ const OfferServices = () => {
                         maxWidthOrHeight: 1000, // Max width or height
                         useWebWorker: true,
                     };
-                    const compressedFile = await imageCompression(formData.profileImage, options);
-                    profileImageData = await processImage(compressedFile);
+                    const compressedFile = await imageCompression(formData.providerImage, options);
+                    serviceData.providerImage = await processImage(compressedFile); // Store as providerImage
                 } catch (compressionError) {
                     console.error('Error compressing image:', compressionError);
                     // If compression fails, try with the original
-                    profileImageData = await processImage(formData.profileImage);
+                    serviceData.providerImage = await processImage(formData.providerImage);
                 }
+            } else {
+                serviceData.providerImage = ''; // Ensure providerImage is an empty string if no image is uploaded
             }
 
-            const serviceData = {
-                ...formData,
-                skills: skillsArray,
-                hourlyRate: Number(formData.hourlyRate),
-                providerName: user.displayName || 'Anonymous',
-                providerEmail: user.email,
-                providerImage: profileImageData || user.photoURL || '',
-                status: 'active'
-            };
+            const serviceToCreate = { ...serviceData };
+            // Remove the File object before sending to Firestore if it's still there from direct assignment
+            if (serviceToCreate.providerImage instanceof File) {
+                 delete serviceToCreate.providerImage;
+            }
 
-            // Remove the File object before sending to Firestore
-            delete serviceData.profileImage;
-
-            await createService(serviceData, user.uid);
+            await createService(serviceToCreate, user.uid);
             navigate('/services');
         } catch (error) {
             console.error('Error creating service:', error);
@@ -248,11 +251,11 @@ const OfferServices = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="profileImage">Profile Image (Optional)</label>
+                        <label htmlFor="providerImage">Profile Image (Optional)</label>
                         <input
                             type="file"
-                            id="profileImage"
-                            name="profileImage"
+                            id="providerImage"
+                            name="providerImage"
                             onChange={handleImageUpload}
                             accept="image/*"
                         />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
+import { createReview, getListingReviews } from '../../services/reviews';
 import './listing.css';
 import MessageButton from "../../components/MessegeButton.jsx";
 
@@ -14,10 +15,14 @@ const ListingDetail = () => {
     const [error, setError] = useState('');
     const [selectedImage, setSelectedImage] = useState(0);
     const [rating, setRating] = useState(0);
+    const [review, setReview] = useState('');
     const [showRatingModal, setShowRatingModal] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [loadingReviews, setLoadingReviews] = useState(true);
 
     useEffect(() => {
         fetchListing();
+        fetchReviews();
     }, [id]);
 
     const fetchListing = async () => {
@@ -37,6 +42,18 @@ const ListingDetail = () => {
         }
     };
 
+    const fetchReviews = async () => {
+        try {
+            setLoadingReviews(true);
+            const reviewsData = await getListingReviews(id);
+            setReviews(reviewsData);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+        } finally {
+            setLoadingReviews(false);
+        }
+    };
+
     const handleRatingSubmit = async () => {
         try {
             if (!user) {
@@ -47,9 +64,27 @@ const ListingDetail = () => {
                 throw new Error('Please select a rating');
             }
 
+            // Update seller rating
             await updateSellerRating(id, rating);
+
+            // Create review if text is provided
+            if (review.trim()) {
+                await createReview({
+                    listingId: id,
+                    sellerId: listing.userId,
+                    buyerId: user.uid,
+                    buyerName: user.displayName,
+                    rating,
+                    review: review.trim(),
+                    listingTitle: listing.title
+                });
+            }
+
             setShowRatingModal(false);
-            fetchListing(); // Refresh listing data
+            setRating(0);
+            setReview('');
+            fetchListing();
+            fetchReviews();
         } catch (error) {
             console.error('Error submitting rating:', error);
             setError(error.message);
@@ -197,6 +232,33 @@ const ListingDetail = () => {
                 </div>
             </div>
 
+            <div className="reviews-section">
+                <h2>Reviews</h2>
+                {loadingReviews ? (
+                    <div className="loading">Loading reviews...</div>
+                ) : reviews.length === 0 ? (
+                    <div className="no-reviews">No reviews yet</div>
+                ) : (
+                    <div className="reviews-list">
+                        {reviews.map(review => (
+                            <div key={review.id} className="review-card">
+                                <div className="review-header">
+                                    <span className="reviewer-name">{review.buyerName}</span>
+                                    <div className="review-rating">
+                                        {'★'.repeat(review.rating)}
+                                        {'☆'.repeat(5 - review.rating)}
+                                    </div>
+                                </div>
+                                <p className="review-text">{review.review}</p>
+                                <span className="review-date">
+                                    {new Date(review.createdAt?.toDate()).toLocaleDateString()}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             {showRatingModal && (
                 <div className="modal-overlay">
                     <div className="rating-modal">
@@ -212,16 +274,29 @@ const ListingDetail = () => {
                                 </button>
                             ))}
                         </div>
+                        <div className="review-input">
+                            <textarea
+                                placeholder="Write your review (optional)"
+                                value={review}
+                                onChange={(e) => setReview(e.target.value)}
+                                rows={4}
+                            />
+                        </div>
                         <div className="modal-buttons">
                             <button
                                 className="cancel-button"
-                                onClick={() => setShowRatingModal(false)}
+                                onClick={() => {
+                                    setShowRatingModal(false);
+                                    setRating(0);
+                                    setReview('');
+                                }}
                             >
                                 Cancel
                             </button>
                             <button
                                 className="submit-button"
                                 onClick={handleRatingSubmit}
+                                disabled={rating === 0}
                             >
                                 Submit Rating
                             </button>

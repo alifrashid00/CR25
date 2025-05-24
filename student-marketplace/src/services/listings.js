@@ -27,6 +27,8 @@ export const createListing = async (listingData, userId) => {
     try {
         let sellerName = 'Anonymous';
         let sellerEmail = '';
+        let sellerRating = 0;
+        let totalRatings = 0;
 
         try {
             const user = await getUserById(userId);
@@ -34,6 +36,8 @@ export const createListing = async (listingData, userId) => {
                 ? `${user.firstName} ${user.lastName}`
                 : user.displayName || 'Anonymous';
             sellerEmail = user.email || '';
+            sellerRating = user.rating || 0;
+            totalRatings = user.totalRatings || 0;
         } catch (error) {
             console.error('Error fetching user data:', error);
         }
@@ -43,12 +47,12 @@ export const createListing = async (listingData, userId) => {
             userId,
             sellerName,
             sellerEmail,
+            sellerRating,
+            totalRatings,
             createdAt: serverTimestamp(),
             status: 'active',
             views: 0,
-            likes: 0,
-            sellerRating: 0,
-            totalRatings: 0
+            likes: 0
         };
 
         const docRef = await addDoc(collection(db, LISTINGS_COLLECTION), listingWithMetadata);

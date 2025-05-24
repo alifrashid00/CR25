@@ -1,0 +1,6 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="400" height="300" fill="#F3F4F6"/>
+<path d="M165.21 134.834C170.973 134.834 175.642 130.165 175.642 124.403C175.642 118.64 170.973 113.971 165.21 113.971C159.447 113.971 154.778 118.64 154.778 124.403C154.778 130.165 159.447 134.834 165.21 134.834Z" fill="#D1D5DB"/>
+<path d="M135 165.473L167.647 144.575L200.294 165.473H135Z" fill="#D1D5DB"/>
+<text x="200" y="200" font-family="Arial, sans-serif" font-size="16" fill="#9CA3AF" text-anchor="middle">Service Image</text>
+</svg>
