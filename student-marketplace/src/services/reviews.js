@@ -17,14 +17,17 @@ const REVIEWS_COLLECTION = 'reviews';
 // Create a new review
 export const createReview = async (reviewData) => {
     try {
-        const reviewWithMetadata = {
+        const reviewsRef = collection(db, 'reviews');
+        const reviewWithTimestamp = {
             ...reviewData,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
+            createdAt: serverTimestamp()
         };
-
-        const docRef = await addDoc(collection(db, REVIEWS_COLLECTION), reviewWithMetadata);
-        return { id: docRef.id, ...reviewWithMetadata };
+        
+        const docRef = await addDoc(reviewsRef, reviewWithTimestamp);
+        return {
+            id: docRef.id,
+            ...reviewWithTimestamp
+        };
     } catch (error) {
         console.error('Error creating review:', error);
         throw error;
@@ -54,19 +57,16 @@ export const getSellerReviews = async (sellerId) => {
 // Get reviews for a listing
 export const getListingReviews = async (listingId) => {
     try {
-        const q = query(
-            collection(db, REVIEWS_COLLECTION),
-            where('listingId', '==', listingId),
-            orderBy('createdAt', 'desc')
-        );
-
+        const reviewsRef = collection(db, 'reviews');
+        const q = query(reviewsRef, where('listingId', '==', listingId));
         const querySnapshot = await getDocs(q);
+        
         return querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
     } catch (error) {
-        console.error('Error getting listing reviews:', error);
+        console.error('Error fetching reviews:', error);
         throw error;
     }
 };

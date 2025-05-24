@@ -19,6 +19,7 @@ import MyServices from "./pages/services/MyServices.jsx";
 import EditListing from "./pages/listing/EditListing.jsx";
 import EditService from "./pages/services/EditService.jsx";
 import AdminViewProfile from "./pages/admin/AdminViewProfile.jsx";
+import BidManagement from "./components/BidManagement.jsx";
 
 // Layout component that includes the sidebar
 const Layout = ({ children }) => {
@@ -148,6 +149,16 @@ function App() {
                         <RoleBasedRoute allowedRoles={["student", "admin"]}>
                             <Layout>
                                 <MyServices />
+                            </Layout>
+                        </RoleBasedRoute>
+                    } 
+                />
+                <Route 
+                    path="/manage-bids" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student", "admin"]}>
+                            <Layout>
+                                <BidManagement />
                             </Layout>
                         </RoleBasedRoute>
                     } 

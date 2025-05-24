@@ -254,6 +254,461 @@ html, body, #root {
     animation: fadeIn 0.5s ease;
 }
 
+.listing-images {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.main-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+.main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+}
+
+.thumbnail {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.thumbnail.selected {
+    border-color: #2563eb;
+}
+
+.listing-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.listing-info h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.price-section {
+    margin: 1rem 0;
+}
+
+.price {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.value {
+    font-size: 1rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.description {
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+.description h2 {
+    font-size: 1.25rem;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.description p {
+    color: #4b5563;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.seller-info {
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+.seller-info h2 {
+    font-size: 1.25rem;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.seller-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.seller-name {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stars {
+    color: #f59e0b;
+    font-size: 1.25rem;
+}
+
+.rating-value {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.total-ratings {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.contact-button,
+.rate-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.contact-button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    flex: 2;
+}
+
+.contact-button:hover {
+    background-color: #1d4ed8;
+}
+
+.rate-button {
+    background-color: white;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    flex: 1;
+}
+
+.rate-button:hover {
+    background-color: #f8fafc;
+}
+
+/* Rating Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.rating-modal {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rating-modal h2 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin: 0;
+    text-align: center;
+}
+
+.rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.star-button {
+    font-size: 2rem;
+    color: #d1d5db;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-button.active {
+    color: #FF9900;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.cancel-button,
+.submit-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.cancel-button {
+    background-color: white;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+}
+
+.cancel-button:hover {
+    background-color: #f9fafb;
+}
+
+.submit-button {
+    background-color: #FF9900;
+    color: white;
+    border: none;
+}
+
+.submit-button:hover {
+    background-color: #e88b00;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .listing-detail-container {
+        grid-template-columns: 1fr;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .contact-button,
+    .rate-button {
+        width: 100%;
+    }
+}
+
+.price-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-range-inputs input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+}
+
+.price-range-inputs input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.price-separator {
+    color: #666;
+    font-weight: 500;
+}
+
+.my-listings-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.manage-bids-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.manage-bids-link:hover {
+    background-color: #1d4ed8;
+    color: white;
+    text-decoration: none;
+}
+
+.create-listing-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #FF9900;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.create-listing-button:hover {
+    background-color: #e88b00;
+}
+
+.listing-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.edit-button,
+.delete-button,
+.manage-bids-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.edit-button {
+    background-color: #232F3E;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #2d3b4d;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+
+.manage-bids-button {
+    background-color: #2563eb;
+    color: white;
+}
+
+.manage-bids-button:hover {
+    background-color: #1d4ed8;
+}
+
+/* Floating Ask Expert Button */
+.ask-expert-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.ask-expert-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    background-color: #1d4ed8;
+}
+
+.ask-expert-button::before {
+    content: "Ask Expert";
+    position: absolute;
+    font-size: 0.875rem;
+    background-color: #1f2937;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    right: calc(100% + 0.5rem);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+}
+
+.ask-expert-button:hover::before {
+    opacity: 1;
+    transform: translateX(0);
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
