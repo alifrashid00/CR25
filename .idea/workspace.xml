@@ -6,9 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="e303c546-82e0-4ffb-88c5-6df89cddec16" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/components/MessegeButton.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/modal/ChatListModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/modal/ChatListModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/modal/ChatModal.css" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/modal/ChatModal.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/modal/ChatModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/modal/ChatModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/Dashboard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/MyListings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/MyListings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/[id].jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/[id].jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/services/ServiceDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/services/ServiceDetail.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

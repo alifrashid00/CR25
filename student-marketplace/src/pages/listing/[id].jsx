@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
 import './listing.css';
-import MessageButton from "../../components/MessegeButton.jsx";
-
+import MessageButton from "../../components/MessageButton.jsx";
 const ListingDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -176,14 +175,26 @@ const ListingDetail = () => {
                         </>
                     ) : (
                         <>
-                            <MessageButton
-                                listing={listing}
-                                currentUser={{
-                                    id: user?.uid,
-                                    displayName: user?.displayName,
-                                    photoURL: user?.photoURL,
-                                }}
-                            />
+                            {!isOwner && (
+                                <>
+                                    <MessageButton
+                                        listing={listing}
+                                        currentUser={{
+                                            id: user?.uid,
+                                            displayName: user?.displayName,
+                                            photoURL: user?.photoURL,
+                                        }}
+                                    />
+                                    {user && (
+                                        <button
+                                            className="rate-button"
+                                            onClick={() => setShowRatingModal(true)}
+                                        >
+                                            Rate Seller
+                                        </button>
+                                    )}
+                                </>
+                            )}
                             {user && (
                                 <button
                                     className="rate-button"
