@@ -50,6 +50,27 @@
     outline: none;
 }
 
+.form-group select {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    background-color: white;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    border-color: #4299e1;
+    outline: none;
+}
+
+.form-group select:disabled {
+    background-color: #f7fafc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .profile-pic-container {
     margin-bottom: 1.5rem;
 }

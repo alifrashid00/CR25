@@ -18,7 +18,10 @@ const Profile = () => {
         phoneNumber: '',
         studentId: '',
         dateOfBirth: '',
-        profilePic: ''
+        profilePic: '',
+        department: '',
+        program: '',
+        yearOfStudy: ''
     });
     const [previewPic, setPreviewPic] = useState(null);
     const [originalData, setOriginalData] = useState({
@@ -27,7 +30,10 @@ const Profile = () => {
         phoneNumber: '',
         studentId: '',
         dateOfBirth: '',
-        profilePic: ''
+        profilePic: '',
+        department: '',
+        program: '',
+        yearOfStudy: ''
     });
     const [originalPreviewPic, setOriginalPreviewPic] = useState(null);
 
@@ -44,7 +50,10 @@ const Profile = () => {
                             phoneNumber: userData.phoneNumber || '',
                             studentId: userData.studentId || '',
                             dateOfBirth: userData.dateOfBirth || '',
-                            profilePic: userData.profilePic || ''
+                            profilePic: userData.profilePic || '',
+                            department: userData.department || '',
+                            program: userData.program || '',
+                            yearOfStudy: userData.yearOfStudy || ''
                         };
                         setFormData(newData);
                         setOriginalData(newData);
@@ -276,6 +285,53 @@ const Profile = () => {
                         disabled={!isEditing}
                         required
                     />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="department">Department</label>
+                    <input
+                        type="text"
+                        id="department"
+                        name="department"
+                        value={formData.department}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        placeholder="e.g., Computer Science and Engineering"
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="program">Program</label>
+                    <input
+                        type="text"
+                        id="program"
+                        name="program"
+                        value={formData.program}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        placeholder="e.g., BSc in Computer Science"
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="yearOfStudy">Year of Study</label>
+                    <select
+                        id="yearOfStudy"
+                        name="yearOfStudy"
+                        value={formData.yearOfStudy}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        required
+                    >
+                        <option value="">Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                        <option value="5">5th Year</option>
+                    </select>
                 </div>
 
                 {isEditing && (

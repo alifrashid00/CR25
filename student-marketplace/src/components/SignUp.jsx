@@ -14,7 +14,10 @@ const SignUp = () => {
         studentId: "",
         phoneNumber: "",
         role: "student",
-        dateOfBirth: ""
+        dateOfBirth: "",
+        department: "",
+        program: "",
+        yearOfStudy: ""
     });
     const [previewPic, setPreviewPic] = useState(null);
     const [error, setError] = useState("");
@@ -191,6 +194,50 @@ const SignUp = () => {
                         onChange={handleChange}
                         required
                     />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="department">Department</label>
+                    <input
+                        type="text"
+                        id="department"
+                        name="department"
+                        value={formData.department}
+                        onChange={handleChange}
+                        placeholder="e.g., Computer Science and Engineering"
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="program">Program</label>
+                    <input
+                        type="text"
+                        id="program"
+                        name="program"
+                        value={formData.program}
+                        onChange={handleChange}
+                        placeholder="e.g., BSc in Computer Science"
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="yearOfStudy">Year of Study</label>
+                    <select
+                        id="yearOfStudy"
+                        name="yearOfStudy"
+                        value={formData.yearOfStudy}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                        <option value="5">5th Year</option>
+                    </select>
                 </div>
 
                 <div className="form-group">
