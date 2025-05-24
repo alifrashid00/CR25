@@ -94,11 +94,215 @@
     font-size: 14px;
 }
 
-.chat-input-container button {
+.location-btn {
+    border: none;
+    background-color: #10b981;
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 0;
+}
+
+.location-btn:hover {
+    background-color: #059669;
+}
+
+.chat-input-container button:last-child {
     border: none;
     background-color: #3b82f6;
     color: white;
     padding: 8px 12px;
     border-radius: 0 6px 6px 0;
     cursor: pointer;
+}
+
+/* Location message styles */
+.location-message {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+}
+
+.location-message.sent {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-left: 4px solid #3b82f6;
+}
+
+.location-message.agreed {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-left: 4px solid #10b981;
+}
+
+.location-message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.location-text {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.location-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.location-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    text-decoration: underline;
+}
+
+.confirmed-status, .agreed-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.confirmed-badge {
+    background: #10b981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.agreed-badge {
+    background: #059669;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    animation: pulse 2s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.location-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.resend-location-btn {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.resend-location-btn:hover {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+.counter-proposal-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.counter-proposal-btn:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+.confirm-location-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.confirm-location-btn:hover {
+    background: #059669;
+}
+
+.location-confirmation {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #d1d5db;
+}
+
+.location-confirmation p {
+    margin: 0 0 10px 0;
+    font-weight: 500;
+    color: #374151;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.confirm-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.confirm-btn:hover {
+    background: #059669;
+}
+
+.cancel-btn {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.cancel-btn:hover {
+    background: #4b5563;
 }

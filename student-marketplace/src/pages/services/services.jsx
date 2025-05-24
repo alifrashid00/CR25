@@ -233,9 +233,8 @@ const Services = () => {
                         <div className="no-services">No services found matching your criteria</div>
                     ) : (
                         filteredServices.map(service => (
-                            <div key={service.id} className="service-card" onClick={() => navigate(`/services/${service.id}`)}>
-                                <div className="service-image">
-                                    <img src={service.profileImage || '/default-service.jpg'} alt={service.title} />
+                            <div key={service.id} className="service-card" onClick={() => navigate(`/services/${service.id}`)}>                                <div className="service-image">
+                                    <img src={service.providerImage || '/default-service.svg'} alt={service.title} />
                                 </div>
                                 <div className="service-details">
                                     <h3>{service.title}</h3>

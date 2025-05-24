@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { getSellerReviews } from '../../services/reviews';
 import './profile.css'
 
 const Profile = () => {
@@ -20,52 +21,36 @@ const Profile = () => {
         profilePic: '',
         university: '',
         department: '',
-        program: '',        yearOfStudy: '',
+        program: '',        
+        yearOfStudy: '',
         ratings: 0,
         totalRatings: 0
+        
     });
+    const [reviews, setReviews] = useState([]);
     const [previewPic, setPreviewPic] = useState(null);
-    const [originalData, setOriginalData] = useState({
-        firstName: '',
-        lastName: '',
-        phoneNumber: '',
-        studentId: '',
-        dateOfBirth: '',
-        profilePic: '',
-        department: '',
-        program: '',
-        yearOfStudy: ''
-    });
-    const [originalPreviewPic, setOriginalPreviewPic] = useState(null);
+    const [originalData, setOriginalData] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
-            if (user?.email) {
+            if (user?.uid) {
                 try {
-                    const userDoc = await getDoc(doc(db, "users", user.email));
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        const newData = {
-                            firstName: userData.firstName || '',
-                            lastName: userData.lastName || '',
-                            phoneNumber: userData.phoneNumber || '',
-                            studentId: userData.studentId || '',
-                            dateOfBirth: userData.dateOfBirth || '',
-                            profilePic: userData.profilePic || '',
-                            university: userData.university || '',
-                            department: userData.department || '',                            program: userData.program || '',
-                            yearOfStudy: userData.yearOfStudy || '',
-                            ratings: userData.ratings || 0,
-                            totalRatings: userData.totalRatings || 0
-                        };
-                        setFormData(newData);
-                        setOriginalData(newData);
-                        setPreviewPic(userData.profilePic || null);
-                        setOriginalPreviewPic(userData.profilePic || null);
+                        setFormData(userData);
+                        setOriginalData(userData);
+                        if (userData.profilePic) {
+                            setPreviewPic(userData.profilePic);
+                        }
+                        
+                        // Fetch seller reviews
+                        const sellerReviews = await getSellerReviews(user.uid);
+                        setReviews(sellerReviews);
                     }
-                } catch (err) {
-                    console.error('Error fetching user data:', err);
-                    setError('Failed to load user data');
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    setError('Failed to load profile data');
                 } finally {
                     setLoading(false);
                 }
@@ -149,7 +134,7 @@ const Profile = () => {
 
     const handleCancel = () => {
         setFormData(originalData);
-        setPreviewPic(originalPreviewPic);
+        setPreviewPic(originalData?.profilePic || null);
         setIsEditing(false);
         setError('');
         setSuccess('');
@@ -185,32 +170,36 @@ const Profile = () => {
     }
 
     return (
-        <div className="profile-container">            <div className="profile-header">
-                <div className="profile-title">
-                    <h2>Profile</h2>
-                    {formData.ratings !== undefined && (
-                        <div className="profile-rating">
-                            <span className="stars">★</span>
-                            <span className="rating-value">
-                                {formData.ratings ? formData.ratings.toFixed(1) : 'New'}
-                            </span>
-                            {formData.totalRatings > 0 && (
-                                <span className="rating-count">
-                                    ({formData.totalRatings} {formData.totalRatings === 1 ? 'rating' : 'ratings'})
-                                </span>
-                            )}
+        <div className="profile-container">
+            <h1>Profile</h1>
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
+
+            <div className="profile-header">
+                <div className="profile-image-container">
+                    {previewPic ? (
+                        <img src={previewPic} alt="Profile" className="profile-image" />
+                    ) : (
+                        <div className="profile-image-placeholder">
+                            {formData.firstName?.[0]}{formData.lastName?.[0]}
                         </div>
                     )}
                 </div>
-                {!isEditing && (
-                    <button onClick={handleEdit} className="edit-button">
-                        Edit Profile
-                    </button>
-                )}
+                <div className="profile-info">
+                    <h2>{formData.firstName} {formData.lastName}</h2>
+                    <div className="seller-rating">
+                        <span className="stars">★</span>
+                        <span className="rating-value">
+                            {formData.rating ? formData.rating.toFixed(1) : 'New'}
+                        </span>
+                        {formData.totalRatings > 0 && (
+                            <span className="total-ratings">
+                                ({formData.totalRatings} {formData.totalRatings === 1 ? 'rating' : 'ratings'})
+                            </span>
+                        )}
+                    </div>
+                </div>
             </div>
-
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
 
             <form onSubmit={handleSubmit} className="profile-form">
                 <div className="form-group profile-pic-container">
@@ -389,6 +378,29 @@ const Profile = () => {
                     </div>
                 )}
             </form>
+
+            {reviews.length > 0 && (
+                <div className="reviews-section">
+                    <h3>Recent Reviews</h3>
+                    <div className="reviews-list">
+                        {reviews.slice(0, 3).map(review => (
+                            <div key={review.id} className="review-card">
+                                <div className="review-header">
+                                    <span className="reviewer-name">{review.buyerName}</span>
+                                    <div className="review-rating">
+                                        {'★'.repeat(review.rating)}
+                                        {'☆'.repeat(5 - review.rating)}
+                                    </div>
+                                </div>
+                                <p className="review-text">{review.review}</p>
+                                <span className="review-date">
+                                    {new Date(review.createdAt?.toDate()).toLocaleDateString()}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
