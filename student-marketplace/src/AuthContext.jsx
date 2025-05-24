@@ -7,17 +7,15 @@ import {
     onAuthStateChanged
 } from "firebase/auth";
 
+
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
+export function AuthProvider({ children }) {    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // University email domains (you can expand this list)
     const universityDomains = [
         "iut-dhaka.edu",
         "du.edu",
-        // add other university domains
     ];
 
     function isUniversityEmail(email) {
@@ -46,6 +44,9 @@ export function AuthProvider({ children }) {
         });
         return () => unsubscribe();
     }, []);
+
+
+
 
     const value = {
         user,
