@@ -227,28 +227,58 @@ const Services = () => {
                 </div>
 
                 <div className="services-grid">
-                    {error ? (
-                        <div className="error-message">{error}</div>
-                    ) : filteredServices.length === 0 ? (
+                    {error && <div className="error-message">{error}</div>}
+                    
+                    {filteredServices.length === 0 ? (
                         <div className="no-services">No services found matching your criteria</div>
                     ) : (
                         filteredServices.map(service => (
-                            <div key={service.id} className="service-card" onClick={() => navigate(`/services/${service.id}`)}>                                <div className="service-image">
-                                    <img src={service.providerImage || '/default-service.svg'} alt={service.title} />
+                            <div 
+                                key={service.id} 
+                                className="service-card"
+                                onClick={() => navigate(`/services/${service.id}`)}
+                            >
+                                <div className="service-image">
+                                    {service.providerImage ? (
+                                        <img 
+                                            src={service.providerImage} 
+                                            alt={service.title}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = '/default-service.png';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="default-image">
+                                            {service.providerName?.[0] || 'A'}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="service-details">
-                                    <h3>{service.title}</h3>
-                                    <p className="rate">৳{service.hourlyRate}/hour</p>
-                                    <div className="skills">
-                                        {service.skills.map((skill, index) => (
+                                <div className="service-content">
+                                    <h3 className="service-title">{service.title}</h3>
+                                    <p className="service-provider">{service.providerName}</p>
+                                    <div className="service-rating">
+                                        <span className="stars">★</span>
+                                        <span className="rating-value">
+                                            {service.providerRating ? service.providerRating.toFixed(1) : 'New'}
+                                        </span>
+                                        {service.totalRatings > 0 && (
+                                            <span className="total-ratings">
+                                                ({service.totalRatings})
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="service-details">
+                                        <span className="service-category">{service.category}</span>
+                                        <span className="service-rate">৳{service.hourlyRate}/hr</span>
+                                    </div>
+                                    <div className="service-skills">
+                                        {service.skills.slice(0, 3).map((skill, index) => (
                                             <span key={index} className="skill-tag">{skill}</span>
                                         ))}
-                                    </div>
-                                    <p className="skill-level">{service.skillLevel}</p>
-                                    <p className="availability">{service.availability}</p>
-                                    <div className="provider-info">
-                                        <span>{service.providerName}</span>
-                                        <span className="rating">★ {service.providerRating || 'New'}</span>
+                                        {service.skills.length > 3 && (
+                                            <span className="more-skills">+{service.skills.length - 3} more</span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
