@@ -1,30 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { Link } from "react-router-dom";
 
-const SignUp = () => {
+const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setLoading(true);
 
         try {
             const auth = getAuth();
-            await createUserWithEmailAndPassword(auth, email, password);
-            // Redirect to dashboard after successful signup
-            navigate("/dashboard");
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate("/dashboard");  // Redirect to dashboard after login
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="signup-container">
-            <h2>Sign Up</h2>
+        <div className="auth-container">
+            <h2>Login</h2>
             {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit}>
                 <input
@@ -41,10 +45,16 @@ const SignUp = () => {
                     placeholder="Password"
                     required
                 />
-                <button type="submit">Sign Up</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Logging in..." : "Login"}
+                </button>
             </form>
+            <div className="auth-links">
+                <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
+                <p><Link to="/forgot-password">Forgot password?</Link></p>
+            </div>
         </div>
     );
 };
 
-export default SignUp;
+export default Login;
