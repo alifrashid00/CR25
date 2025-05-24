@@ -7,6 +7,9 @@ import { getListingReviews, createReview } from '../../services/reviews';
 import './listing-detail.css';
 import MessageButton from "../../components/MessageButton";
 import ExpertChat from "../../components/ExpertChat";
+import { getListingReviews } from '../../services/reviews';
+
+
 
 import './listing.css';
 
@@ -41,7 +44,7 @@ const ListingDetail = () => {
             setError('');
             const listingData = await getListingById(id);
             setListing(listingData);
-            
+
             // Increment view count
             await incrementViewCount(id);
 
@@ -77,7 +80,7 @@ const ListingDetail = () => {
             setBidLoading(true);
             setBidError('');
             const amount = parseFloat(bidAmount);
-            
+
             if (isNaN(amount) || amount <= 0) {
                 throw new Error('Please enter a valid bid amount');
             }
@@ -92,7 +95,7 @@ const ListingDetail = () => {
 
             await createBid(id, user.uid, amount);
             setBidAmount('');
-            
+
             // Refresh bids
             const [bidsData, highestBidData] = await Promise.all([
                 getListingBids(id),
@@ -207,7 +210,7 @@ const ListingDetail = () => {
 
             <div className="listing-info">
                 <h1>{listing.title}</h1>
-                
+
                 <div className="price-section">
                     {listing.pricingType === 'fixed' && (
                         <p className="price">৳{listing.price.toLocaleString()}</p>
@@ -215,7 +218,7 @@ const ListingDetail = () => {
                     {listing.pricingType === 'bidding' && (
                         <div className="bidding-section">
                             <p className="price">
-                                {highestBid 
+                                {highestBid
                                     ? `Highest Bid: ৳${highestBid.amount.toLocaleString()}`
                                     : 'No bids yet'}
                             </p>
@@ -232,8 +235,8 @@ const ListingDetail = () => {
                                             required
                                             disabled={bidLoading}
                                         />
-                                        <button 
-                                            type="submit" 
+                                        <button
+                                            type="submit"
                                             disabled={bidLoading}
                                         >
                                             {bidLoading ? 'Placing Bid...' : 'Place Bid'}
@@ -312,10 +315,10 @@ const ListingDetail = () => {
                 <div className="action-buttons">
                     {isOwner ? (
                         <>
-                            <button className="edit-button" onClick={handleEdit}>
+                            <button className="btn-edit" onClick={handleEdit}>
                                 Edit Listing
                             </button>
-                            <button className="delete-button" onClick={handleDelete}>
+                            <button className="btn-delete" onClick={handleDelete}>
                                 Delete Listing
                             </button>
                             {listing.pricingType === 'bidding' && (
@@ -381,7 +384,7 @@ const ListingDetail = () => {
                 )}
             </div>
             {/* Replace the old ask expert button with the new ExpertChat component */}
-            <ExpertChat 
+            <ExpertChat
                 listing={listing}
                 onClose={() => {/* Handle close if needed */}}
             />
@@ -402,12 +405,12 @@ const ListingDetail = () => {
                             ))}
                         </div>
                         <div className="review-input">
-                            <textarea
-                                placeholder="Write your review (optional)"
-                                value={review}
-                                onChange={(e) => setReview(e.target.value)}
-                                rows={4}
-                            />
+                              <textarea
+                                  placeholder="Write your review (optional)"
+                                  value={review}
+                                  onChange={(e) => setReview(e.target.value)}
+                                  rows={4}
+                              />
                         </div>
                         <div className="modal-buttons">
                             <button
@@ -420,16 +423,15 @@ const ListingDetail = () => {
                             >
                                 Cancel
                             </button>
-                            <button
-                                className="submit-button"
-                                onClick={handleRatingSubmit}
-                                disabled={rating === 0}
-                            >
-                                Submit Rating
+
+                            <button className="submit-button" onClick={handleRatingSubmit}
+                                    disabled={rating === 0}>Submit
                             </button>
-                        </div>
+
                     </div>
                 </div>
+                </div>
+
             )}
         </div>
     );
