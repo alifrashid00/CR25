@@ -208,3 +208,43 @@ input:disabled {
     gap: 1rem;
     margin-top: 1rem;
 }
+
+.ratings-display {
+    background-color: #f8fafc;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.rating-stars {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stars {
+    color: #f59e0b;
+    font-size: 1.25rem;
+}
+
+.rating-value {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.rating-count {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.profile-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

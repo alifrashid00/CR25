@@ -20,8 +20,9 @@ const Profile = () => {
         profilePic: '',
         university: '',
         department: '',
-        program: '',
-        yearOfStudy: ''
+        program: '',        yearOfStudy: '',
+        ratings: 0,
+        totalRatings: 0
     });
     const [previewPic, setPreviewPic] = useState(null);
     const [originalData, setOriginalData] = useState({
@@ -44,16 +45,18 @@ const Profile = () => {
                     const userDoc = await getDoc(doc(db, "users", user.email));
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        const newData = {                            firstName: userData.firstName || '',
+                        const newData = {
+                            firstName: userData.firstName || '',
                             lastName: userData.lastName || '',
                             phoneNumber: userData.phoneNumber || '',
                             studentId: userData.studentId || '',
                             dateOfBirth: userData.dateOfBirth || '',
                             profilePic: userData.profilePic || '',
                             university: userData.university || '',
-                            department: userData.department || '',
-                            program: userData.program || '',
-                            yearOfStudy: userData.yearOfStudy || ''
+                            department: userData.department || '',                            program: userData.program || '',
+                            yearOfStudy: userData.yearOfStudy || '',
+                            ratings: userData.ratings || 0,
+                            totalRatings: userData.totalRatings || 0
                         };
                         setFormData(newData);
                         setOriginalData(newData);
@@ -182,9 +185,23 @@ const Profile = () => {
     }
 
     return (
-        <div className="profile-container">
-            <div className="profile-header">
-                <h2>Profile</h2>
+        <div className="profile-container">            <div className="profile-header">
+                <div className="profile-title">
+                    <h2>Profile</h2>
+                    {formData.ratings !== undefined && (
+                        <div className="profile-rating">
+                            <span className="stars">★</span>
+                            <span className="rating-value">
+                                {formData.ratings ? formData.ratings.toFixed(1) : 'New'}
+                            </span>
+                            {formData.totalRatings > 0 && (
+                                <span className="rating-count">
+                                    ({formData.totalRatings} {formData.totalRatings === 1 ? 'rating' : 'ratings'})
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
                 {!isEditing && (
                     <button onClick={handleEdit} className="edit-button">
                         Edit Profile
@@ -344,6 +361,22 @@ const Profile = () => {
                         <option value="5">5th Year</option>
                     </select>
                 </div>
+
+                {/* <div className="form-group">
+                    <label>Ratings</label>
+                    <div className="ratings-display">
+                        <div className="rating-stars">
+                            <span className="stars">★</span>
+                            <span className="rating-value">                                {formData.ratings ? formData.ratings.toFixed(1) : 'New'}
+                            </span>
+                            {formData.totalRatings > 0 && (
+                                <span className="rating-count">
+                                    ({formData.totalRatings} {formData.totalRatings === 1 ? 'rating' : 'ratings'})
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div> */}
 
                 {isEditing && (
                     <div className="button-group">

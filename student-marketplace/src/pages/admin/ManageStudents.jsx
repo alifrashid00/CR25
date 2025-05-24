@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import './ManageStudents.css';
 
 const ManageStudents = () => {
+    const navigate = useNavigate();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -152,13 +154,18 @@ const ManageStudents = () => {
                     </thead>
                     <tbody>
                         {filteredAndSortedStudents.map((student) => (
-                            <tr key={student.id}>
+                            <tr 
+                                key={student.id} 
+                                onClick={() => navigate(`/manage-students/${student.email}`)}
+                                className="student-row"
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <td>{`${student.firstName} ${student.lastName}`}</td>
                                 <td>{student.email}</td>
                                 <td>{student.university}</td>
                                 <td>{student.department}</td>
                                 <td>{student.yearOfStudy}</td>
-                                <td className="action-buttons">
+                                <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                                     <button
                                         className={`suspend-button ${student.suspended ? 'unsuspend' : ''}`}
                                         onClick={() => handleSuspend(student.id, student.suspended)}

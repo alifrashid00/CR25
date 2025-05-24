@@ -18,6 +18,7 @@ import MyListings from "./pages/listing/MyListings.jsx";
 import MyServices from "./pages/services/MyServices.jsx";
 import EditListing from "./pages/listing/EditListing.jsx";
 import EditService from "./pages/services/EditService.jsx";
+import AdminViewProfile from "./pages/admin/AdminViewProfile.jsx";
 
 // Layout component that includes the sidebar
 const Layout = ({ children }) => {
@@ -170,6 +171,16 @@ function App() {
                             </Layout>
                         </RoleBasedRoute>
                     } 
+                />
+                <Route 
+                    path="/manage-students/:email" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["admin"]}>
+                            <Layout>
+                                <AdminViewProfile />
+                            </Layout>
+                        </RoleBasedRoute>
+                    }
                 />
             </Routes>
 
