@@ -55,19 +55,13 @@ const Sidebar = () => {
                 <Link to="/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
                     Dashboard
                 </Link>
-                <Link to="/listing" className={`nav-item ${isActive('/listing') ? 'active' : ''}`}>
-                    Browse Listings
-                </Link>
+
                 <Link to="/my-listings" className={`nav-item ${isActive('/my-listings') ? 'active' : ''}`}>
                     My Listings
                 </Link>
-                <Link to="/manage-bids" className={`nav-item ${isActive('/manage-bids') ? 'active' : ''}`}>
-                    Manage Bids
-                </Link>
+
                 <Link to="/sell" className={`nav-item ${isActive('/sell') ? 'active' : ''}`}>
                     Sell Item
-                </Link>                <Link to="/services" className={`nav-item ${isActive('/services') ? 'active' : ''}`}>
-                    Browse Services
                 </Link>
                 <Link to="/my-services" className={`nav-item ${isActive('/my-services') ? 'active' : ''}`}>
                     My Services
