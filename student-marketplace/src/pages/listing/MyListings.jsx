@@ -53,7 +53,7 @@ const MyListings = () => {
         <div className="my-listings-container">
             <div className="listings-header">
                 <h2>My Listings</h2>
-                <Link to="/sell" className="create-listing-button">Create New Listing</Link>
+                <Link to="/sell" className="mini-button">Create New Listing</Link>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -76,11 +76,11 @@ const MyListings = () => {
                                 </p>
                                 <p className="condition">{listing.condition}</p>
                                 <p className="university">{listing.university}</p>
-                                <div className="listing-actions">
-                                    <button onClick={() => handleUpdate(listing.id)}>Edit</button>
-                                    <button onClick={() => handleDelete(listing.id)}>Delete</button>
+                                <div className="button-group">
+                                    <button className="mini-button " onClick={() => handleUpdate(listing.id)}>Edit</button>
+                                    <button className="mini-button " onClick={() => handleDelete(listing.id)}>Delete</button>
                                     <button
-                                        className="chat-button"
+                                        className="mini-button"
                                         onClick={() => setSelectedListing(listing)}
                                     >
                                         View Chats
