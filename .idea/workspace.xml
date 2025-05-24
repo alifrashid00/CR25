@@ -5,19 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e303c546-82e0-4ffb-88c5-6df89cddec16" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/components/Chatbot.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/components/Chatbot.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/components/LocationPicker.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/components/LocationPicker.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/components/LocationSelectionModal.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/components/LocationSelectionModal.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/student-marketplace/src/services/groq.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/student-marketplace/src/modal/ChatListModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/modal/ChatListModal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/student-marketplace/src/modal/ChatModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/modal/ChatModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.css" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/listing/listing.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student-marketplace/src/pages/services/EditService.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/student-marketplace/src/pages/services/EditService.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +32,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "P:/codeRush25",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
