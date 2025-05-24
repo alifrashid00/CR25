@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
-import { getListingById, incrementViewCount, updateSellerRating } from '../../services/listings';
+import { getListingById, incrementViewCount, updateSellerRating, deleteListing } from '../../services/listings';
 import './listing.css';
 import MessageButton from "../../components/MessegeButton.jsx";
 
@@ -56,6 +56,22 @@ const ListingDetail = () => {
         }
     };
 
+    const handleEdit = () => {
+        navigate(`/listing/${id}/edit`);
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this listing?')) {
+            try {
+                await deleteListing(id);
+                navigate('/my-listings');
+            } catch (error) {
+                console.error('Error deleting listing:', error);
+                setError('Failed to delete listing. Please try again.');
+            }
+        }
+    };
+
     if (loading) {
         return <div className="loading">Loading listing...</div>;
     }
@@ -67,6 +83,8 @@ const ListingDetail = () => {
     if (!listing) {
         return <div className="error-message">Listing not found</div>;
     }
+
+    const isOwner = user && user.uid === listing.userId;
 
     return (
         <div className="listing-detail-container">
@@ -147,21 +165,34 @@ const ListingDetail = () => {
                 </div>
 
                 <div className="action-buttons">
-                    <MessageButton
-                        listing={listing}
-                        currentUser={{
-                            id: user?.uid,
-                            displayName: user?.displayName,
-                            photoURL: user?.photoURL,
-                        }}
-                    />
-                    {user && user.uid !== listing.userId && (
-                        <button
-                            className="rate-button"
-                            onClick={() => setShowRatingModal(true)}
-                        >
-                            Rate Seller
-                        </button>
+                    {isOwner ? (
+                        <>
+                            <button className="edit-button" onClick={handleEdit}>
+                                Edit Listing
+                            </button>
+                            <button className="delete-button" onClick={handleDelete}>
+                                Delete Listing
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <MessageButton
+                                listing={listing}
+                                currentUser={{
+                                    id: user?.uid,
+                                    displayName: user?.displayName,
+                                    photoURL: user?.photoURL,
+                                }}
+                            />
+                            {user && (
+                                <button
+                                    className="rate-button"
+                                    onClick={() => setShowRatingModal(true)}
+                                >
+                                    Rate Seller
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

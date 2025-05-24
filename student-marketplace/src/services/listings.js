@@ -17,6 +17,7 @@ import {
     getCountFromServer
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getUserById } from './users';
 
 const LISTINGS_COLLECTION = 'listings';
 const LISTINGS_PER_PAGE = 12;
@@ -24,9 +25,24 @@ const LISTINGS_PER_PAGE = 12;
 // Create a new listing
 export const createListing = async (listingData, userId) => {
     try {
+        let sellerName = 'Anonymous';
+        let sellerEmail = '';
+
+        try {
+            const user = await getUserById(userId);
+            sellerName = user.firstName && user.lastName 
+                ? `${user.firstName} ${user.lastName}`
+                : user.displayName || 'Anonymous';
+            sellerEmail = user.email || '';
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+
         const listingWithMetadata = {
             ...listingData,
             userId,
+            sellerName,
+            sellerEmail,
             createdAt: serverTimestamp(),
             status: 'active',
             views: 0,
@@ -86,9 +102,25 @@ export const getListings = async (filters = {}, lastDoc = null) => {
         q = query(q, limit(LISTINGS_PER_PAGE));
         
         const querySnapshot = await getDocs(q);
-        const listings = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
+        const listings = await Promise.all(querySnapshot.docs.map(async doc => {
+            const listingData = {
+                id: doc.id,
+                ...doc.data()
+            };
+            
+            // Fetch user data if not already included
+            if (!listingData.sellerName) {
+                try {
+                    const user = await getUserById(listingData.userId);
+                    listingData.sellerName = user.firstName + ' ' + user.lastName;
+                    listingData.sellerEmail = user.email;
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    listingData.sellerName = 'Anonymous';
+                }
+            }
+            
+            return listingData;
         }));
 
         // Get total count for pagination
@@ -164,17 +196,31 @@ export const subscribeToListings = (filters = {}, callback) => {
 // Get a single listing by ID
 export const getListingById = async (id) => {
     try {
-        const docRef = doc(db, 'listings', id);
+        const docRef = doc(db, LISTINGS_COLLECTION, id);
         const docSnap = await getDoc(docRef);
         
         if (!docSnap.exists()) {
             throw new Error('Listing not found');
         }
 
-        return {
+        const listingData = {
             id: docSnap.id,
             ...docSnap.data()
         };
+
+        // Fetch user data if not already included
+        if (!listingData.sellerName) {
+            try {
+                const user = await getUserById(listingData.userId);
+                listingData.sellerName = user.firstName + ' ' + user.lastName;
+                listingData.sellerEmail = user.email;
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                listingData.sellerName = 'Anonymous';
+            }
+        }
+
+        return listingData;
     } catch (error) {
         console.error('Error getting listing:', error);
         throw error;

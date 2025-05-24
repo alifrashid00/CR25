@@ -17,6 +17,7 @@ import {
     getCountFromServer
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getUserById } from './users';
 
 const SERVICES_COLLECTION = 'services';
 const SERVICES_PER_PAGE = 12;
@@ -24,9 +25,24 @@ const SERVICES_PER_PAGE = 12;
 // Create a new service
 export const createService = async (serviceData, userId) => {
     try {
+        let providerName = 'Anonymous';
+        let providerEmail = '';
+
+        try {
+            const user = await getUserById(userId);
+            providerName = user.firstName && user.lastName 
+                ? `${user.firstName} ${user.lastName}`
+                : user.displayName || 'Anonymous';
+            providerEmail = user.email || '';
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+
         const serviceWithMetadata = {
             ...serviceData,
             userId,
+            providerName,
+            providerEmail,
             createdAt: serverTimestamp(),
             status: 'active',
             views: 0,
@@ -82,9 +98,25 @@ export const getServices = async (filters = {}, lastDoc = null) => {
         q = query(q, limit(SERVICES_PER_PAGE));
         
         const querySnapshot = await getDocs(q);
-        const services = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
+        const services = await Promise.all(querySnapshot.docs.map(async doc => {
+            const serviceData = {
+                id: doc.id,
+                ...doc.data()
+            };
+            
+            // Fetch user data if not already included
+            if (!serviceData.providerName) {
+                try {
+                    const user = await getUserById(serviceData.userId);
+                    serviceData.providerName = user.firstName + ' ' + user.lastName;
+                    serviceData.providerEmail = user.email;
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    serviceData.providerName = 'Anonymous';
+                }
+            }
+            
+            return serviceData;
         }));
 
         // Get total count for pagination
@@ -113,10 +145,24 @@ export const getServiceById = async (id) => {
             throw new Error('Service not found');
         }
 
-        return {
+        const serviceData = {
             id: docSnap.id,
             ...docSnap.data()
         };
+
+        // Fetch user data if not already included
+        if (!serviceData.providerName) {
+            try {
+                const user = await getUserById(serviceData.userId);
+                serviceData.providerName = user.firstName + ' ' + user.lastName;
+                serviceData.providerEmail = user.email;
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                serviceData.providerName = 'Anonymous';
+            }
+        }
+
+        return serviceData;
     } catch (error) {
         console.error('Error getting service:', error);
         throw error;

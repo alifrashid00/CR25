@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
-import { createListing } from '../../services/listings';
-import { processMultipleImages, validateImage } from '../../services/storage';
-import imageCompression from 'browser-image-compression'; // Import the library
-import './sell.css';
+import { getListingById, updateListing } from '../../services/listings';
+import { processMultipleImages } from '../../services/storage';
+import imageCompression from 'browser-image-compression';
+import './listing.css';
 
-const Sell = () => {
+const EditListing = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
     const [formData, setFormData] = useState({
@@ -16,11 +17,11 @@ const Sell = () => {
         category: '',
         condition: 'new',
         images: [],
-        visibility: 'university', // 'university' or 'all'
-        pricingType: 'fixed', // 'fixed', 'bidding', or 'negotiable'
-        university: user?.university || ''
+        visibility: 'university',
+        pricingType: 'fixed',
+        university: ''
     });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [imageErrors, setImageErrors] = useState([]);
 
@@ -34,6 +35,39 @@ const Sell = () => {
         'Other'
     ];
 
+    useEffect(() => {
+        fetchListing();
+    }, [id]);
+
+    const fetchListing = async () => {
+        try {
+            setLoading(true);
+            const listing = await getListingById(id);
+            
+            // Check if the user owns this listing
+            if (listing.userId !== user.uid) {
+                throw new Error('You do not have permission to edit this listing');
+            }
+
+            setFormData({
+                title: listing.title,
+                description: listing.description,
+                price: listing.price || '',
+                category: listing.category,
+                condition: listing.condition,
+                images: listing.images,
+                visibility: listing.visibility,
+                pricingType: listing.pricingType,
+                university: listing.university
+            });
+        } catch (error) {
+            console.error('Error fetching listing:', error);
+            setError(error.message || 'Failed to load listing. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -42,28 +76,36 @@ const Sell = () => {
         }));
     };
 
-    const handleImageUpload = (e) => {
+    const handleImageChange = async (e) => {
         const files = Array.from(e.target.files);
-        const errors = [];
-        const validFiles = [];
+        setImageErrors([]);
 
-        files.forEach((file, index) => {
-            try {
-                validateImage(file);
-                validFiles.push(file);
-            } catch (error) {
-                errors.push(`Image ${index + 1}: ${error.message}`);
+        try {
+            // Validate images
+            for (const file of files) {
+                if (file.size > 5 * 1024 * 1024) {
+                    throw new Error('Each image must be less than 5MB');
+                }
             }
-        });
 
-        if (errors.length > 0) {
-            setImageErrors(errors);
-        } else {
-            setImageErrors([]);
+            // Compress images
+            const compressedFiles = await Promise.all(
+                files.map(file => imageCompression(file, {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true
+                }))
+            );
+
+            // Process images
+            const base64Images = await processMultipleImages(compressedFiles);
             setFormData(prev => ({
                 ...prev,
-                images: [...prev.images, ...validFiles]
+                images: [...prev.images, ...base64Images]
             }));
+        } catch (error) {
+            console.error('Error processing images:', error);
+            setImageErrors([error.message]);
         }
     };
 
@@ -76,74 +118,60 @@ const Sell = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
+        if (!user) {
+            setError('Please log in to update your listing');
+            return;
+        }
 
         try {
-            if (!user) {
-                throw new Error('You must be logged in to create a listing');
+            setLoading(true);
+            setError('');
+
+            // Process any new images if they were added
+            let processedImages = [...formData.images];
+            if (formData.newImages && formData.newImages.length > 0) {
+                const newProcessedImages = await processMultipleImages(formData.newImages);
+                processedImages = [...processedImages, ...newProcessedImages];
             }
 
-            // Images are now optional - removed the check for formData.images.length === 0
-
-            // Compress images before processing (only if there are images)
-            let base64Images = [];
-            if (formData.images.length > 0) {
-                // Compress images before processing
-                const compressedImages = await Promise.all(
-                    formData.images.map(async (imageFile) => {
-                        const options = {
-                            maxSizeMB: 0.5, // Max size in MB (e.g., 0.5MB)
-                            maxWidthOrHeight: 1920, // Max width or height
-                            useWebWorker: true,
-                        };
-                        try {
-                            const compressedFile = await imageCompression(imageFile, options);
-                            return compressedFile;
-                        } catch (compressionError) {
-                            console.error('Error compressing image:', compressionError);
-                            // Optionally, you could decide to upload the original if compression fails,
-                            // or skip this image, or show an error to the user.
-                            // For now, we'll try to upload the original if compression fails.
-                            return imageFile; 
-                        }
-                    })
-                );
-
-                // Process images to base64
-                base64Images = await processMultipleImages(compressedImages);
-            }
-
-            // Create listing data
             const listingData = {
                 ...formData,
-                images: base64Images,
+                images: processedImages,
                 price: formData.pricingType === 'fixed' ? Number(formData.price) : null,
-                userId: user.uid,
-                sellerName: user.displayName,
-                sellerEmail: user.email,
-                sellerRating: 0,
-                totalRatings: 0
+                updatedAt: new Date(),
+                userId: user.uid // Ensure userId is included
             };
 
-            // Create the listing in Firestore
-            const newListing = await createListing(listingData, user.uid);
-            
-            // Redirect to the new listing
-            navigate(`/listing/${newListing.id}`);
+            // Remove any temporary fields
+            delete listingData.newImages;
+
+            await updateListing(id, listingData);
+            navigate(`/listing/${id}`);
         } catch (error) {
-            console.error('Error creating listing:', error);
-            setError(error.message || 'Failed to create listing. Please try again.');
+            console.error('Error updating listing:', error);
+            setError(error.message || 'Failed to update listing. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
+    if (loading) {
+        return <div className="loading">Loading listing...</div>;
+    }
+
     return (
         <div className="sell-container">
-            <h1>Create New Listing</h1>
+            <h2>Edit Listing</h2>
             {error && <div className="error-message">{error}</div>}
-            <form onSubmit={handleSubmit} className="listing-form">
+            {imageErrors.length > 0 && (
+                <div className="error-message">
+                    {imageErrors.map((error, index) => (
+                        <p key={index}>{error}</p>
+                    ))}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="sell-form">
                 <div className="form-group">
                     <label htmlFor="title">Title</label>
                     <input
@@ -153,8 +181,6 @@ const Sell = () => {
                         value={formData.title}
                         onChange={handleChange}
                         required
-                        placeholder="What are you selling?"
-                        maxLength={100}
                     />
                 </div>
 
@@ -166,9 +192,6 @@ const Sell = () => {
                         value={formData.description}
                         onChange={handleChange}
                         required
-                        placeholder="Describe your item in detail..."
-                        rows="4"
-                        maxLength={1000}
                     />
                 </div>
 
@@ -183,7 +206,9 @@ const Sell = () => {
                     >
                         <option value="">Select a category</option>
                         {categories.map(category => (
-                            <option key={category} value={category}>{category}</option>
+                            <option key={category} value={category}>
+                                {category}
+                            </option>
                         ))}
                     </select>
                 </div>
@@ -215,23 +240,22 @@ const Sell = () => {
                         required
                     >
                         <option value="fixed">Fixed Price</option>
-                        <option value="bidding">Open to Bids</option>
                         <option value="negotiable">Negotiable</option>
+                        <option value="bidding">Open to Bids</option>
                     </select>
                 </div>
 
                 {formData.pricingType === 'fixed' && (
                     <div className="form-group">
-                        <label htmlFor="price">Price (BDT)</label>
+                        <label htmlFor="price">Price (৳)</label>
                         <input
                             type="number"
                             id="price"
                             name="price"
                             value={formData.price}
                             onChange={handleChange}
-                            required
                             min="0"
-                            placeholder="Enter price"
+                            required
                         />
                     </div>
                 )}
@@ -245,37 +269,17 @@ const Sell = () => {
                         onChange={handleChange}
                         required
                     >
-                        <option value="university">My University Only</option>
-                        <option value="all">All Universities</option>
+                        <option value="university">University Only</option>
+                        <option value="all">All Users</option>
                     </select>
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="images">Images</label>
-                    <input
-                        type="file"
-                        id="images"
-                        name="images"
-                        onChange={handleImageUpload}
-                        multiple
-                        accept="image/jpeg,image/png,image/webp"
-                        required
-                    />
-                    {imageErrors.length > 0 && (
-                        <div className="error-message">
-                            {imageErrors.map((error, index) => (
-                                <p key={index}>{error}</p>
-                            ))}
-                        </div>
-                    )}
-                    <div className="image-preview">
+                    <label>Images</label>
+                    <div className="image-preview-grid">
                         {formData.images.map((image, index) => (
-                            <div key={index} className="preview-container">
-                                <img
-                                    src={URL.createObjectURL(image)}
-                                    alt={`Preview ${index + 1}`}
-                                    className="preview-image"
-                                />
+                            <div key={index} className="image-preview">
+                                <img src={image} alt={`Preview ${index + 1}`} />
                                 <button
                                     type="button"
                                     className="remove-image"
@@ -286,14 +290,21 @@ const Sell = () => {
                             </div>
                         ))}
                     </div>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                        className="image-input"
+                    />
                 </div>
 
                 <button type="submit" className="submit-button" disabled={loading}>
-                    {loading ? 'Creating Listing...' : 'Create Listing'}
+                    {loading ? 'Updating...' : 'Update Listing'}
                 </button>
             </form>
         </div>
     );
 };
 
-export default Sell;
+export default EditListing; 
