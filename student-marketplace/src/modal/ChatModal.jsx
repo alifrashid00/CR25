@@ -57,25 +57,32 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
 
     const handleLocationSelect = async (locations) => {
         const messagesRef = collection(db, 'conversations', conversationId, 'messages');
-        await addDoc(messagesRef, {
-            senderId: currentUserId,
-            text: `Shared ${locations.length} potential meeting locations`,
-            locations: locations,
-            createdAt: serverTimestamp(),
-            type: 'location',
-            status: 'pending'
-        });
+        
+        // Send each location as a separate message with a clickable link
+        for (let i = 0; i < locations.length; i++) {
+            const location = locations[i];
+            const locationText = `📍 Location ${i + 1}: https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}&zoom=16#map=16/${location.lat}/${location.lng}`;
+            
+            await addDoc(messagesRef, {
+                senderId: currentUserId,
+                text: locationText,
+                locationData: location,
+                createdAt: serverTimestamp(),
+                type: 'location',
+                status: 'pending'
+            });
+        }
 
         setShowLocationModal(false);
         scrollToBottom();
     };
 
-    const handleLocationConfirm = async (messageId, selectedLocation) => {
+    const handleLocationConfirm = async (messageId, locationData) => {
         // Update the message to confirmed status
         const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
         await updateDoc(messageRef, {
             status: 'confirmed',
-            confirmedLocation: selectedLocation,
+            confirmedLocation: locationData,
             confirmedBy: currentUserId,
             confirmedAt: serverTimestamp()
         });
@@ -89,7 +96,7 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                 // Update current user's profile
                 const currentUserRef = doc(db, 'users', currentUserData.id);
                 await updateDoc(currentUserRef, {
-                    meetingLocation: selectedLocation,
+                    meetingLocation: locationData,
                     meetingWith: receiverId,
                     lastUpdated: serverTimestamp()
                 });
@@ -97,7 +104,7 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
                 // Update receiver's profile
                 const receiverUserRef = doc(db, 'users', receiverUserData.id);
                 await updateDoc(receiverUserRef, {
-                    meetingLocation: selectedLocation,
+                    meetingLocation: locationData,
                     meetingWith: currentUserId,
                     lastUpdated: serverTimestamp()
                 });
@@ -113,12 +120,12 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
         }));
     };
 
-    const handleLocationClick = (messageId, location) => {
+    const handleLocationClick = (messageId, locationData) => {
         if (pendingLocationConfirmations[messageId]) return;
         
         setPendingLocationConfirmations(prev => ({
             ...prev,
-            [messageId]: location
+            [messageId]: locationData
         }));
     };
 
@@ -138,52 +145,72 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
 
     const renderMessage = (msg) => {
         if (msg.type === 'location') {
+            const isConfirmed = msg.status === 'confirmed';
+            const canConfirm = msg.senderId !== currentUserId && !isConfirmed;
+            const isPending = pendingLocationConfirmations[msg.id];
+            
+            // Check if the message contains a proper URL
+            const hasValidUrl = msg.text && msg.text.includes('https://');
+
             return (
                 <div key={msg.id} className={`chat-message location-message ${msg.senderId === currentUserId ? 'sent' : 'received'}`}>
-                    <div className="location-message-header">
-                        <span className="location-icon">📍</span>
-                        <span>{msg.text}</span>
-                        {msg.status === 'confirmed' && (
-                            <span className="confirmed-badge">✅ Confirmed</span>
+                    <div className="location-message-content">
+                        <div className="location-text">
+                            {hasValidUrl ? (
+                                <>
+                                    {msg.text.split('https://')[0]}
+                                    <a 
+                                        href={msg.text.substring(msg.text.indexOf('https://'))} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="location-link"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        View on Map 🗺️
+                                    </a>
+                                </>
+                            ) : (
+                                <span>{msg.text || 'Location shared'}</span>
+                            )}
+                        </div>
+                        
+                        {isConfirmed && (
+                            <div className="confirmed-status">
+                                <span className="confirmed-badge">✅ Meeting Place Confirmed</span>
+                            </div>
+                        )}
+
+                        {canConfirm && !isPending && (
+                            <div className="location-actions">
+                                <button 
+                                    className="confirm-location-btn"
+                                    onClick={() => handleLocationClick(msg.id, msg.locationData)}
+                                >
+                                    📍 Set as Meeting Place
+                                </button>
+                            </div>
+                        )}
+
+                        {isPending && (
+                            <div className="location-confirmation">
+                                <p>Confirm this as your meeting location?</p>
+                                <div className="confirmation-buttons">
+                                    <button 
+                                        className="confirm-btn"
+                                        onClick={() => confirmLocationSelection(msg.id)}
+                                    >
+                                        Confirm
+                                    </button>
+                                    <button 
+                                        className="cancel-btn"
+                                        onClick={() => cancelLocationSelection(msg.id)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
-                    
-                    {msg.locations && msg.locations.map((location, index) => (
-                        <div key={index} className="location-item">
-                            <div 
-                                className={`location-pin ${pendingLocationConfirmations[msg.id] === location ? 'selected' : ''} ${msg.status === 'confirmed' && msg.confirmedLocation === location ? 'confirmed' : ''}`}
-                                onClick={() => msg.senderId !== currentUserId && msg.status !== 'confirmed' && handleLocationClick(msg.id, location)}
-                            >
-                                <span className="pin-icon">📍</span>
-                                <span className="location-coords">
-                                    Location {index + 1}: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-                                </span>
-                                {msg.status === 'confirmed' && msg.confirmedLocation === location && (
-                                    <span className="meeting-place-badge">🏢 Meeting Place</span>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-
-                    {pendingLocationConfirmations[msg.id] && (
-                        <div className="location-confirmation">
-                            <p>Confirm this as your meeting location?</p>
-                            <div className="confirmation-buttons">
-                                <button 
-                                    className="confirm-btn"
-                                    onClick={() => confirmLocationSelection(msg.id)}
-                                >
-                                    Confirm
-                                </button>
-                                <button 
-                                    className="cancel-btn"
-                                    onClick={() => cancelLocationSelection(msg.id)}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
             );
         }
@@ -196,8 +223,8 @@ const ChatModal = ({ conversationId, currentUserId, receiverId, onClose }) => {
     };
 
         return (
-        <div className="chat-modal-overlay">
-            <div className="chat-modal-container">
+        <div className="chat-modal-overlay" onClick={(e) => e.stopPropagation()}>
+            <div className="chat-modal-container" onClick={(e) => e.stopPropagation()}>
                 <button className="chat-close-button" onClick={onClose}>✕</button>
                 <div className="chat-messages">
                     {messages.map((msg) => renderMessage(msg))}

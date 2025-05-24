@@ -131,78 +131,68 @@
     border-left: 4px solid #3b82f6;
 }
 
-.location-message-header {
+.location-message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.location-text {
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
-    font-weight: 600;
+    flex-wrap: wrap;
 }
 
-.location-icon {
-    font-size: 18px;
+.location-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.location-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    text-decoration: underline;
+}
+
+.confirmed-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .confirmed-badge {
     background: #10b981;
     color: white;
-    padding: 2px 8px;
+    padding: 4px 12px;
     border-radius: 12px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.location-item {
-    margin-bottom: 8px;
+.location-actions {
+    margin-top: 8px;
 }
 
-.location-pin {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-}
-
-.location-pin:hover {
-    background: rgba(255, 255, 255, 0.95);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.location-pin.selected {
-    border-color: #3b82f6;
-    background: #dbeafe;
-}
-
-.location-pin.confirmed {
-    border-color: #10b981;
-    background: #d1fae5;
-}
-
-.pin-icon {
-    font-size: 16px;
-    color: #dc2626;
-}
-
-.location-coords {
-    font-family: monospace;
-    font-size: 12px;
-    color: #374151;
-}
-
-.meeting-place-badge {
+.confirm-location-btn {
     background: #10b981;
     color: white;
-    padding: 2px 6px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 600;
-    margin-left: auto;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.confirm-location-btn:hover {
+    background: #059669;
 }
 
 .location-confirmation {
