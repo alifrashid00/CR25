@@ -7,7 +7,6 @@ import { getListingReviews, createReview } from '../../services/reviews';
 import './listing-detail.css';
 import MessageButton from "../../components/MessageButton";
 import ExpertChat from "../../components/ExpertChat";
-import { getListingReviews } from '../../services/reviews';
 
 
 
