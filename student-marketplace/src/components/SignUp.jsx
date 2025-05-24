@@ -217,19 +217,7 @@ const SignUp = () => {
                     />
                 </div>
 
-                {/* <div className="form-group">
-                    <label htmlFor="role">Role</label>
-                    <select
-                        id="role"
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div> */}
+
 
                 <button type="submit">Sign Up</button>
                 

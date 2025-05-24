@@ -11,6 +11,7 @@ import Unauthorized from "./pages/Unauthorized.jsx";
 import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import ServiceDetail from './pages/services/ServiceDetail';
 import Sidebar from './components/Sidebar';
+import Profile from "./pages/profile/Profile.jsx";
 
 // Layout component that includes the sidebar
 const Layout = ({ children }) => {
@@ -105,7 +106,18 @@ function App() {
                         </RoleBasedRoute>
                     } 
                 />
+                <Route 
+                    path="/profile" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student", "admin"]}>
+                            <Layout>
+                                <Profile />
+                            </Layout>
+                        </RoleBasedRoute>
+                    }
+                />
             </Routes>
+
         </Router>
     );
 }
