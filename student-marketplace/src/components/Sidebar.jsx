@@ -71,9 +71,8 @@ const Sidebar = () => {
             <div className="sidebar-footer">
                 {user && (
                     <>
-                        <div className="profile-section">
-                            <img 
-                                src={user.photoURL || "/default-avatar.png"} 
+                        <div className="profile-section">                            <img 
+                                src={userData?.profilePic || "/default-avatar.png"} 
                                 alt="Profile" 
                                 className="profile-photo"
                             />

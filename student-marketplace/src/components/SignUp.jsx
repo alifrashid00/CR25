@@ -15,6 +15,7 @@ const SignUp = () => {
         phoneNumber: "",
         role: "student",
     });
+    const [previewPic, setPreviewPic] = useState(null);
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
@@ -24,6 +25,65 @@ const SignUp = () => {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleProfilePicChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resizeImage(reader.result, 200, 200, (resizedImage) => {
+                    setPreviewPic(resizedImage);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleDrop = (event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resizeImage(reader.result, 200, 200, (resizedImage) => {
+                    setPreviewPic(resizedImage);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };    const resizeImage = (base64Str, maxWidth, maxHeight, callback) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+                const scaleFactor = Math.min(maxWidth / width, maxHeight / height);
+                width *= scaleFactor;
+                height *= scaleFactor;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            // Using PNG format for maximum quality and WebP as a fallback
+            try {
+                const webpData = canvas.toDataURL("image/webp", 1.0);
+                if (webpData.length < 1024 * 1024) { // Check if less than 1MB
+                    callback(webpData);
+                } else {
+                    // If WebP is too large, fallback to PNG
+                    callback(canvas.toDataURL("image/png"));
+                }
+            } catch (e) {
+                // If WebP is not supported, use PNG
+                callback(canvas.toDataURL("image/png"));
+            }
+        };
     };
     
     const handleSubmit = async (e) => {
@@ -42,6 +102,7 @@ const SignUp = () => {
                 ...userData,
                 uid: userCredential.user.uid,
                 email,
+                profilePic: previewPic || "",
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             });
@@ -58,6 +119,31 @@ const SignUp = () => {
             <h2>Sign Up</h2>
             {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit} className="signup-form">
+                <div className="form-group profile-pic-container">
+                    <label htmlFor="profilePic">Profile Picture</label>
+                    <div 
+                        className="profile-pic-dropzone"
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={handleDrop}
+                    >
+                        {previewPic ? (
+                            <img src={previewPic} alt="Profile preview" className="profile-preview" />
+                        ) : (
+                            <div className="upload-placeholder">
+                                Drag & drop an image here or click to select
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            id="profilePic"
+                            name="profilePic"
+                            accept="image/*"
+                            onChange={handleProfilePicChange}
+                            className="profile-pic-input"
+                        />
+                    </div>
+                </div>
+
                 <div className="form-group">
                     <label htmlFor="firstName">First Name</label>
                     <input
@@ -131,7 +217,7 @@ const SignUp = () => {
                     />
                 </div>
 
-                <div className="form-group">
+                {/* <div className="form-group">
                     <label htmlFor="role">Role</label>
                     <select
                         id="role"
@@ -143,7 +229,7 @@ const SignUp = () => {
                         <option value="student">Student</option>
                         <option value="admin">Admin</option>
                     </select>
-                </div>
+                </div> */}
 
                 <button type="submit">Sign Up</button>
                 
