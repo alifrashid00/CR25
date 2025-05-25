@@ -38,11 +38,16 @@ export const createService = async (serviceData, userId) => {
                 ? `${user.firstName} ${user.lastName}`
                 : user.displayName || 'Anonymous';
             providerEmail = user.email || '';
-            providerImage = user.photoURL || '';
+            providerImage = user.profilePic || user.photoURL || '';
             providerRating = user.rating || 0;
             totalRatings = user.totalRatings || 0;
         } catch (error) {
             console.error('Error fetching user data:', error);
+        }
+
+        // If there's a provider image in the service data, use that instead
+        if (serviceData.providerImage) {
+            providerImage = serviceData.providerImage;
         }
 
         const serviceWithMetadata = {
@@ -57,6 +62,11 @@ export const createService = async (serviceData, userId) => {
             status: 'active',
             views: 0
         };
+
+        // Remove the File object if it exists
+        if (serviceWithMetadata.providerImage instanceof File) {
+            delete serviceWithMetadata.providerImage;
+        }
 
         const docRef = await addDoc(collection(db, SERVICES_COLLECTION), serviceWithMetadata);
         return { id: docRef.id, ...serviceWithMetadata };

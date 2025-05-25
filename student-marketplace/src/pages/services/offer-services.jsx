@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { createService } from '../../services/services';
 import { processImage } from '../../services/storage';
-import imageCompression from 'browser-image-compression'; // Import explicitly
+import imageCompression from 'browser-image-compression';
 import './offer-services.css';
 
 const OfferServices = () => {
@@ -11,7 +11,8 @@ const OfferServices = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [imageError, setImageError] = useState(''); // Add state for image errors
+    const [imageError, setImageError] = useState('');
+    const [previewImage, setPreviewImage] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -21,7 +22,7 @@ const OfferServices = () => {
         hourlyRate: '',
         availability: '',
         university: '',
-        providerImage: null // Store File object for provider image
+        providerImage: null
     });
 
     const handleChange = (e) => {
@@ -32,8 +33,38 @@ const OfferServices = () => {
         }));
     };
 
-    // Add handler for file input
-    const handleImageUpload = (e) => {
+    const resizeImage = (base64Str, maxWidth, maxHeight, callback) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+                const scaleFactor = Math.min(maxWidth / width, maxHeight / height);
+                width *= scaleFactor;
+                height *= scaleFactor;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            try {
+                const webpData = canvas.toDataURL("image/webp", 0.8);
+                if (webpData.length < 1024 * 1024) {
+                    callback(webpData);
+                } else {
+                    callback(canvas.toDataURL("image/jpeg", 0.8));
+                }
+            } catch (error) {
+                callback(canvas.toDataURL("image/jpeg", 0.8));
+            }
+        };
+    };
+
+    const handleImageUpload = async (e) => {
         const file = e.target.files[0];
         
         if (!file) {
@@ -41,6 +72,7 @@ const OfferServices = () => {
                 ...prev,
                 providerImage: null
             }));
+            setPreviewImage(null);
             return;
         }
 
@@ -57,10 +89,31 @@ const OfferServices = () => {
         }
 
         setImageError('');
-        setFormData(prev => ({
-            ...prev,
-            providerImage: file
-        }));
+        
+        try {
+            // Compress the image first
+            const options = {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 800,
+                useWebWorker: true,
+            };
+            const compressedFile = await imageCompression(file, options);
+            
+            // Process the compressed image
+            const processedImage = await processImage(compressedFile);
+            
+            // Set the preview
+            setPreviewImage(processedImage);
+            
+            // Update form data with the processed image
+            setFormData(prev => ({
+                ...prev,
+                providerImage: processedImage
+            }));
+        } catch (error) {
+            console.error('Error processing image:', error);
+            setImageError('Failed to process image. Please try again.');
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -86,33 +139,13 @@ const OfferServices = () => {
                 status: 'active'
             };
 
-            // Process image if one was selected
-            if (formData.providerImage) {
-                // Compress the image first
-                try {
-                    const options = {
-                        maxSizeMB: 0.5, // Max size in MB
-                        maxWidthOrHeight: 1000, // Max width or height
-                        useWebWorker: true,
-                    };
-                    const compressedFile = await imageCompression(formData.providerImage, options);
-                    serviceData.providerImage = await processImage(compressedFile); // Store as providerImage
-                } catch (compressionError) {
-                    console.error('Error compressing image:', compressionError);
-                    // If compression fails, try with the original
-                    serviceData.providerImage = await processImage(formData.providerImage);
-                }
-            } else {
-                serviceData.providerImage = ''; // Ensure providerImage is an empty string if no image is uploaded
+            // The image is already processed in handleImageUpload
+            // Just make sure it's not a File object
+            if (serviceData.providerImage instanceof File) {
+                delete serviceData.providerImage;
             }
 
-            const serviceToCreate = { ...serviceData };
-            // Remove the File object before sending to Firestore if it's still there from direct assignment
-            if (serviceToCreate.providerImage instanceof File) {
-                 delete serviceToCreate.providerImage;
-            }
-
-            await createService(serviceToCreate, user.uid);
+            await createService(serviceData, user.uid);
             navigate('/services');
         } catch (error) {
             console.error('Error creating service:', error);
@@ -129,6 +162,7 @@ const OfferServices = () => {
                 <p className="subtitle">Share your skills and expertise with the student community</p>
 
                 {error && <div className="error-message">{error}</div>}
+                {imageError && <div className="error-message">{imageError}</div>}
 
                 <form onSubmit={handleSubmit} className="offer-services-form">
                     <div className="form-group">
@@ -251,16 +285,21 @@ const OfferServices = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="providerImage">Profile Image (Optional)</label>
-                        <input
-                            type="file"
-                            id="providerImage"
-                            name="providerImage"
-                            onChange={handleImageUpload}
-                            accept="image/*"
-                        />
-                        {imageError && <div className="error-message">{imageError}</div>}
-                        <small>Optional. Max size: 5MB. Recommended dimensions: 500x500px</small>
+                        <label htmlFor="providerImage">Profile Image</label>
+                        <div className="image-upload-container">
+                            <input
+                                type="file"
+                                id="providerImage"
+                                name="providerImage"
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                            />
+                            {previewImage && (
+                                <div className="image-preview">
+                                    <img src={previewImage} alt="Preview" />
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <button 
