@@ -17,7 +17,8 @@ import {
     getCountFromServer
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getUserById } from './users';
+import { getUserById, getUsersByIds } from './users';
+import { cache } from './cache';
 
 const SERVICES_COLLECTION = 'services';
 const SERVICES_PER_PAGE = 12;
@@ -115,26 +116,33 @@ export const getServices = async (filters = {}, lastDoc = null) => {
         q = query(q, limit(SERVICES_PER_PAGE));
         
         const querySnapshot = await getDocs(q);
-        const services = await Promise.all(querySnapshot.docs.map(async doc => {
+        
+        // Extract unique user IDs
+        const userIds = [...new Set(querySnapshot.docs.map(doc => doc.data().userId))];
+        
+        // Batch fetch user data
+        const usersMap = await getUsersByIds(userIds);
+        
+        const services = querySnapshot.docs.map(doc => {
             const serviceData = {
                 id: doc.id,
                 ...doc.data()
             };
             
-            // Fetch user data if not already included
-            if (!serviceData.providerName) {
-                try {
-                    const user = await getUserById(serviceData.userId);
-                    serviceData.providerName = user.firstName + ' ' + user.lastName;
-                    serviceData.providerEmail = user.email;
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                    serviceData.providerName = 'Anonymous';
-                }
+            // Add user data from batch fetch
+            const user = usersMap.get(serviceData.userId);
+            if (user) {
+                serviceData.providerName = user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.displayName || 'Anonymous';
+                serviceData.providerEmail = user.email || '';
+            } else {
+                serviceData.providerName = 'Anonymous';
+                serviceData.providerEmail = '';
             }
             
             return serviceData;
-        }));
+        });
 
         // Get total count for pagination
         const countQuery = query(collection(db, SERVICES_COLLECTION), where('status', '==', 'active'));
@@ -155,6 +163,13 @@ export const getServices = async (filters = {}, lastDoc = null) => {
 // Get a single service by ID
 export const getServiceById = async (id) => {
     try {
+        // Check cache first
+        const cacheKey = `service_${id}`;
+        const cached = cache.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+
         const docRef = doc(db, SERVICES_COLLECTION, id);
         const docSnap = await getDoc(docRef);
         
@@ -171,14 +186,20 @@ export const getServiceById = async (id) => {
         if (!serviceData.providerName) {
             try {
                 const user = await getUserById(serviceData.userId);
-                serviceData.providerName = user.firstName + ' ' + user.lastName;
-                serviceData.providerEmail = user.email;
+                serviceData.providerName = user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.displayName || 'Anonymous';
+                serviceData.providerEmail = user.email || '';
+                serviceData.providerImage = user.photoURL || '';
             } catch (error) {
                 console.error('Error fetching user data:', error);
                 serviceData.providerName = 'Anonymous';
+                serviceData.providerEmail = '';
             }
         }
 
+        // Cache the result
+        cache.set(cacheKey, serviceData, 2 * 60 * 1000); // 2 minutes cache
         return serviceData;
     } catch (error) {
         console.error('Error getting service:', error);

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getListings } from '../../services/listings';
 import Chatbot from '../../components/Chatbot';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import SkeletonCard from '../../components/SkeletonCard';
 import './listing.css';
 
 const Listing = () => {
@@ -70,18 +68,14 @@ const Listing = () => {
             
             return true;
         });
-    }, [allListings, filters]);    const fetchInitialListings = useCallback(async () => {
+    }, [allListings, filters]);
+
+    const fetchInitialListings = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
             const { listings, lastDoc: newLastDoc, hasMore: moreAvailable } = await getListings({}, null);
-            
-            // Ensure unique listings even on initial fetch
-            const uniqueListings = listings.filter((listing, index, self) => 
-                index === self.findIndex(l => l.id === listing.id)
-            );
-            
-            setAllListings(uniqueListings);
+            setAllListings(listings);
             setLastDoc(newLastDoc);
             setHasMore(moreAvailable);
         } catch (error) {
@@ -90,20 +84,15 @@ const Listing = () => {
         } finally {
             setLoading(false);
         }
-    }, []);const loadMoreListings = useCallback(async () => {
+    }, []);
+
+    const loadMoreListings = useCallback(async () => {
         if (!hasMore || loadingMore) return;
         
         try {
             setLoadingMore(true);
             const { listings, lastDoc: newLastDoc, hasMore: moreAvailable } = await getListings({}, lastDoc);
-            
-            // Prevent duplicate listings by filtering out those that already exist
-            setAllListings(prev => {
-                const existingIds = new Set(prev.map(listing => listing.id));
-                const newListings = listings.filter(listing => !existingIds.has(listing.id));
-                return [...prev, ...newListings];
-            });
-            
+            setAllListings(prev => [...prev, ...listings]);
             setLastDoc(newLastDoc);
             setHasMore(moreAvailable);
         } catch (error) {
@@ -125,6 +114,51 @@ const Listing = () => {
         }));
     };
 
+    const applyFilters = () => {
+        let filtered = [...allListings];
+
+        // Apply search filter
+        if (filters.searchQuery) {
+            const query = filters.searchQuery.toLowerCase();
+            filtered = filtered.filter(listing => 
+                listing.title.toLowerCase().includes(query) ||
+                listing.description.toLowerCase().includes(query)
+            );
+        }
+
+        // Apply category filter
+        if (filters.category) {
+            filtered = filtered.filter(listing => listing.category === filters.category);
+        }
+
+        // Apply condition filter
+        if (filters.condition) {
+            filtered = filtered.filter(listing => listing.condition === filters.condition);
+        }
+
+        // Apply pricing type filter
+        if (filters.pricingType) {
+            filtered = filtered.filter(listing => listing.pricingType === filters.pricingType);
+        }
+
+        // Apply visibility filter
+        if (filters.visibility) {
+            filtered = filtered.filter(listing => listing.visibility === filters.visibility);
+        }
+
+        // Apply price range filter
+        const minPrice = filters.minPrice ? Number(filters.minPrice) : 0;
+        const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : Infinity;
+        
+        filtered = filtered.filter(listing => {
+            if (listing.pricingType !== 'fixed') return true;
+            const price = listing.price;
+            return price >= minPrice && price <= maxPrice;
+        });
+
+        setFilteredListings(filtered);
+    };
+
     const clearFilters = () => {
         const emptyFilters = {
             category: '',
@@ -137,31 +171,88 @@ const Listing = () => {
             searchQuery: ''
         };
         setFilters(emptyFilters);
+        setFilteredListings(allListings);
     };
 
     const handleChatbotFilters = (chatbotFilters) => {
         const updatedFilters = { ...filters, ...chatbotFilters };
         setFilters(updatedFilters);
+        
+        // Apply the filters immediately
+        let filtered = [...allListings];
+
+        // Apply search filter
+        if (updatedFilters.searchQuery) {
+            const query = updatedFilters.searchQuery.toLowerCase();
+            filtered = filtered.filter(listing => 
+                listing.title.toLowerCase().includes(query) ||
+                listing.description.toLowerCase().includes(query)
+            );
+        }
+
+        // Apply category filter
+        if (updatedFilters.category) {
+            filtered = filtered.filter(listing => listing.category === updatedFilters.category);
+        }
+
+        // Apply condition filter
+        if (updatedFilters.condition) {
+            filtered = filtered.filter(listing => listing.condition === updatedFilters.condition);
+        }
+
+        // Apply pricing type filter
+        if (updatedFilters.pricingType) {
+            filtered = filtered.filter(listing => listing.pricingType === updatedFilters.pricingType);
+        }
+
+        // Apply visibility filter
+        if (updatedFilters.visibility) {
+            filtered = filtered.filter(listing => listing.visibility === updatedFilters.visibility);
+        }
+
+        // Apply price range filter
+        const minPrice = updatedFilters.minPrice ? Number(updatedFilters.minPrice) : 0;
+        const maxPrice = updatedFilters.maxPrice ? Number(updatedFilters.maxPrice) : Infinity;
+        
+        filtered = filtered.filter(listing => {
+            if (listing.pricingType !== 'fixed') return true;
+            const price = listing.price;
+            return price >= minPrice && price <= maxPrice;
+        });
+
+        setFilteredListings(filtered);
     };
 
     const handleSuggestionsUpdate = (suggestions) => {
         setSuggestedItems(suggestions);
+        
+        // If suggestions are provided, filter listings to show only suggested items
+        if (suggestions && suggestions.length > 0) {
+            const suggestedListings = allListings.filter(listing => 
+                suggestions.includes(listing.id) || 
+                suggestions.includes(listing.title) ||
+                suggestions.some(suggestion => 
+                    listing.title.toLowerCase().includes(suggestion.toLowerCase()) ||
+                    listing.description?.toLowerCase().includes(suggestion.toLowerCase())
+                )
+            );
+            
+            // If we found suggested listings, show them; otherwise show current filtered results
+            if (suggestedListings.length > 0) {
+                setFilteredListings(suggestedListings);
+            }
+        }
     };
 
     const clearSuggestions = () => {
         setSuggestedItems([]);
+        // Apply current filters to show all relevant listings
+        applyFilters();
     };
 
-    // Scroll event handler for infinite loading
-    useEffect(() => {
-        const handleScroll = () => {
-            if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || loadingMore) {
-                return;
-            }
-            loadMoreListings();
-        };        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [loadMoreListings, loadingMore]);
+    if (loading) {
+        return <div className="loading">Loading listings...</div>;
+    }
 
     return (
         <div className="listings-container">
@@ -197,28 +288,29 @@ const Listing = () => {
                         <span className="suggestions-icon">🤖</span>
                         Showing AI suggested items ({filteredListings.length} found)
                     </div>
-                )}                <div className="listings-grid">
-                    {loading ? (
-                        <SkeletonCard count={8} />
-                    ) : error ? (
+                )}
+
+                <div className="listings-grid">
+                    {error ? (
                         <div className="error-message">{error}</div>
                     ) : filteredListings.length === 0 ? (
                         <div className="no-listings">No listings found matching your criteria</div>
-                    ) : (                        filteredListings.map((listing, index) => {
+                    ) : (
+                        filteredListings.map(listing => {
                             const isSuggested = suggestedItems.includes(listing.id) || suggestedItems.includes(listing.title);
                             return (
                                 <div 
-                                    key={`${listing.id}-${index}`} 
+                                    key={listing.id} 
                                     className={`listing-card ${isSuggested ? 'suggested' : ''}`} 
                                     onClick={() => navigate(`/listing/${listing.id}`)}
                                 >
                                     <div className="listing-image">
-                                        <img src={listing.images?.[0]} alt={listing.title} />
+                                        <img src={listing.images[0]} alt={listing.title} />
                                     </div>
                                     <div className="listing-details">
                                         <h3>{listing.title}</h3>
                                         {listing.pricingType === 'fixed' && (
-                                            <p className="price">৳{listing.price?.toLocaleString()}</p>
+                                            <p className="price">৳{listing.price.toLocaleString()}</p>
                                         )}
                                         {listing.pricingType === 'bidding' && (
                                             <p className="price">Open to Bids</p>
@@ -237,20 +329,7 @@ const Listing = () => {
                             );
                         })
                     )}
-                </div>{/* Load more button or loading indicator */}
-                {hasMore && (
-                    <div className="load-more-container">                        {loadingMore ? (
-                            <LoadingSpinner 
-                                size="medium"
-                                className="load-more-spinner"
-                            />
-                        ) : (
-                            <button className="load-more-button" onClick={loadMoreListings}>
-                                Load More
-                            </button>
-                        )}
-                    </div>
-                )}
+                </div>
             </div>
             
             {showFilterModal && (
@@ -271,7 +350,7 @@ const Listing = () => {
                                     Clear All
                                 </button>
                             </div>
-                            <form className="filters-form" onSubmit={(e) => { e.preventDefault(); setShowFilterModal(false); }}>
+                            <form className="filters-form" onSubmit={(e) => { e.preventDefault(); applyFilters(); setShowFilterModal(false); }}>
                                 <div className="filter-group">
                                     <label htmlFor="searchQuery">Search</label>
                                     <input
@@ -356,7 +435,7 @@ const Listing = () => {
                                         <option value="">All Pricing Types</option>
                                         <option value="fixed">Fixed Price</option>
                                         <option value="negotiable">Negotiable</option>
-                                        <option value="bidding">Bidding</option>
+                                        <option value="auction">Auction</option>
                                     </select>
                                 </div>
 

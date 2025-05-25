@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getServices, deleteService } from '../../services/services';
+import ServiceChatListModal from '../../modal/ServiceChatListModal.jsx';
 import './services.css';
 
 const MyServices = () => {
@@ -10,14 +11,9 @@ const MyServices = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [selectedService, setSelectedService] = useState(null);
 
-    useEffect(() => {
-        if (user) {
-            fetchMyServices();
-        }
-    }, [user]);
-
-    const fetchMyServices = async () => {
+    const fetchMyServices = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -29,7 +25,13 @@ const MyServices = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user.uid]);
+
+    useEffect(() => {
+        if (user) {
+            fetchMyServices();
+        }
+    }, [user, fetchMyServices]);
 
     const handleUpdate = (serviceId) => {
         navigate(`/services/${serviceId}/edit`);
@@ -90,12 +92,29 @@ const MyServices = () => {
                                     >
                                         Delete
                                     </button>
+                                    <button
+                                        className="chat-button"
+                                        onClick={() => setSelectedService(service)}
+                                    >
+                                        View Chats
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     ))
                 )}
             </div>
+
+            {selectedService && (() => {
+                console.log("Opening ServiceChatListModal for:", selectedService?.id);
+                return (
+                    <ServiceChatListModal
+                        service={selectedService}
+                        providerId={user.uid}
+                        onClose={() => setSelectedService(null)}
+                    />
+                );
+            })()}
         </div>
     );
 };

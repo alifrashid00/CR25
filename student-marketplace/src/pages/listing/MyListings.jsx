@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
-import { getListings, deleteListing } from '../../services/listings';
+import { getListings, deleteListing, markAsSold } from '../../services/listings';
 import ChatListModal from "../../modal/ChatListModal.jsx";
 import './listing.css';
 
@@ -13,11 +13,7 @@ const MyListings = () => {
     const [error, setError] = useState('');
     const [selectedListing, setSelectedListing] = useState(null);
 
-    useEffect(() => {
-        if (user) fetchMyListings();
-    }, [user]);
-
-    const fetchMyListings = async () => {
+    const fetchMyListings = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -29,7 +25,11 @@ const MyListings = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user.uid]);
+
+    useEffect(() => {
+        if (user) fetchMyListings();
+    }, [user, fetchMyListings]);
 
     const handleUpdate = (listingId) => navigate(`/listing/${listingId}/edit`);
 
@@ -41,6 +41,18 @@ const MyListings = () => {
             } catch (error) {
                 console.error('Error deleting listing:', error);
                 setError('Failed to delete listing. Please try again.');
+            }
+        }
+    };
+
+    const handleMarkAsSold = async (listingId) => {
+        if (window.confirm('Are you sure you want to mark this listing as sold? This will remove it from search results.')) {
+            try {
+                await markAsSold(listingId);
+                setListings(listings.filter(listing => listing.id !== listingId));
+            } catch (error) {
+                console.error('Error marking listing as sold:', error);
+                setError('Failed to mark listing as sold. Please try again.');
             }
         }
     };
@@ -82,6 +94,7 @@ const MyListings = () => {
                                 <div className="button-group">
                                     <button className="mini-button " onClick={() => handleUpdate(listing.id)}>Edit</button>
                                     <button className="mini-button " onClick={() => handleDelete(listing.id)}>Delete</button>
+                                    <button className="mini-button sold-button" onClick={() => handleMarkAsSold(listing.id)}>Mark as Sold</button>
                                     <button
                                         className="mini-button"
                                         onClick={() => setSelectedListing(listing)}

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getServiceById, incrementViewCount, updateProviderRating, deleteService } from '../../services/services';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ExpertChat from '../../components/ExpertChat';
 import './service-detail.css';
 import MessageButton from "../../components/MessageButton.jsx";
 const ServiceDetail = () => {
@@ -13,11 +15,7 @@ const ServiceDetail = () => {
     const [error, setError] = useState('');
     const [rating, setRating] = useState(0);
     const [showRatingModal, setShowRatingModal] = useState(false);
-    const [contactInfo, setContactInfo] = useState({
-        show: false,
-        email: '',
-        phone: ''
-    });
+    const [ratingLoading, setRatingLoading] = useState(false);
 
     useEffect(() => {
         const fetchService = async () => {
@@ -45,6 +43,7 @@ const ServiceDetail = () => {
         }
 
         try {
+            setRatingLoading(true);
             await updateProviderRating(id, rating);
             setService(prev => ({
                 ...prev,
@@ -56,19 +55,9 @@ const ServiceDetail = () => {
         } catch (error) {
             console.error('Error submitting rating:', error);
             setError('Failed to submit rating. Please try again.');
+        } finally {
+            setRatingLoading(false);
         }
-    };
-
-    const handleContact = () => {
-        if (!user) {
-            setError('Please log in to contact the service provider');
-            return;
-        }
-        setContactInfo({
-            show: true,
-            email: service.providerEmail,
-            phone: service.providerPhone || 'Not provided'
-        });
     };
 
     const handleEdit = () => {
@@ -88,7 +77,7 @@ const ServiceDetail = () => {
     };
 
     if (loading) {
-        return <div className="loading">Loading service details...</div>;
+        return <LoadingSpinner size="large" />;
     }
 
     if (error) {
@@ -207,21 +196,11 @@ const ServiceDetail = () => {
                     </div>
                 </div>
 
-                {contactInfo.show && (
-                    <div className="contact-modal">
-                        <div className="contact-content">
-                            <h3>Contact Information</h3>
-                            <p>Email: {contactInfo.email}</p>
-                            <p>Phone: {contactInfo.phone}</p>
-                            <button 
-                                className="close-button"
-                                onClick={() => setContactInfo(prev => ({ ...prev, show: false }))}
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                )}
+                {/* Expert Analysis for Services */}
+                <ExpertChat 
+                    service={service}
+                    onClose={() => {/* Handle close if needed */}}
+                />
 
                 {showRatingModal && (
                     <div className="rating-modal">
@@ -251,9 +230,13 @@ const ServiceDetail = () => {
                                 <button 
                                     className="submit-rating-button"
                                     onClick={handleRatingSubmit}
-                                    disabled={rating === 0}
+                                    disabled={rating === 0 || ratingLoading}
                                 >
-                                    Submit Rating
+                                    {ratingLoading ? (
+                                        <LoadingSpinner size="small" />
+                                    ) : (
+                                        'Submit Rating'
+                                    )}
                                 </button>
                             </div>
                         </div>

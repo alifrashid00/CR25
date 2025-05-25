@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import './ExpertChat.css';
 
-const ExpertChat = ({ listing, onClose }) => {
+const ExpertChat = ({ listing, service, onClose }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const analyzeListing = async () => {
+    // Determine if we're dealing with a listing or service
+    const item = listing || service;
+    const itemType = listing ? 'listing' : 'service';
+
+    const analyzeItem = async () => {
         setLoading(true);
         try {
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -20,23 +24,39 @@ const ExpertChat = ({ listing, onClose }) => {
                     messages: [
                         {
                             role: 'system',
-                            content: 'You are an expert market analyst for student marketplace items. Analyze the listing and provide a detailed market value assessment and buying advice.'
+                            content: `You are an expert market analyst for student marketplace ${itemType}s. Analyze the ${itemType} and provide a detailed assessment and recommendation.`
                         },
                         {
                             role: 'user',
-                            content: `Please analyze this listing and provide:
+                            content: itemType === 'listing' ? 
+                                `Please analyze this listing and provide:
 1. A summary of the item
 2. Estimated market value
 3. Fair price recommendation
 4. Buying advice
-5. give every thing into one paragraph
+5. Give everything in one paragraph
 
 Listing details:
-Title: ${listing.title}
-Price: ${listing.price}
-Condition: ${listing.condition}
-Category: ${listing.category}
-Description: ${listing.description}`
+Title: ${item.title}
+Price: ${item.price}
+Condition: ${item.condition}
+Category: ${item.category}
+Description: ${item.description}` :
+                                `Please analyze this service and provide:
+1. A summary of the service
+2. Market rate assessment
+3. Fair rate recommendation
+4. Hiring advice
+5. Give everything in one paragraph
+
+Service details:
+Title: ${item.title}
+Rate: ৳${item.hourlyRate}/hour
+Category: ${item.category}
+Skill Level: ${item.skillLevel}
+University: ${item.university}
+Description: ${item.description}
+Skills: ${item.skills?.join(', ') || 'Not specified'}`
                         }
                     ],
                     temperature: 0.7,
@@ -64,8 +84,8 @@ Description: ${listing.description}`
 
             setAnalysis(analysisText);
         } catch (error) {
-            console.error('Error analyzing listing:', error);
-            setAnalysis(`Sorry, I encountered an error while analyzing the listing: ${error.message}. Please try again later.`);
+            console.error(`Error analyzing ${itemType}:`, error);
+            setAnalysis(`Sorry, I encountered an error while analyzing the ${itemType}: ${error.message}. Please try again later.`);
         } finally {
             setLoading(false);
         }
@@ -78,7 +98,7 @@ Description: ${listing.description}`
                 onClick={() => {
                     setIsExpanded(!isExpanded);
                     if (!isExpanded && !analysis) {
-                        analyzeListing();
+                        analyzeItem();
                     }
                 }}
             >
@@ -97,7 +117,7 @@ Description: ${listing.description}`
                     
                     <div className="expert-chat-body">
                         {loading ? (
-                            <div className="loading">Analyzing listing...</div>
+                            <div className="loading">Analyzing {itemType}...</div>
                         ) : analysis ? (
                             <div className="analysis-content">
                                 {analysis.split('\n').map((line, index) => (

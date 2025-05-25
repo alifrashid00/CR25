@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import './ManageStudents.css';
 
 const ManageStudents = () => {
@@ -23,19 +24,18 @@ const ManageStudents = () => {
     const fetchStudents = async () => {
         try {
             setLoading(true);
-            const usersRef = collection(db, "users");
-            const querySnapshot = await getDocs(usersRef);
-            const studentsList = [];
-
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data();
-                if (userData.role === 'student') {
-                    studentsList.push({
-                        id: doc.id,
-                        ...userData
-                    });
-                }
-            });
+            
+            // Use query with where clause to filter students only
+            const q = query(
+                collection(db, "users"),
+                where('role', '==', 'student')
+            );
+            
+            const querySnapshot = await getDocs(q);
+            const studentsList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
 
             setStudents(studentsList);
             setError('');
@@ -113,7 +113,7 @@ const ManageStudents = () => {
             return 0;
         });
 
-    if (loading) return <div className="loading">Loading students...</div>;
+    if (loading) return <LoadingSpinner size="large" />;
     if (error) return <div className="error-message">{error}</div>;
 
     return (

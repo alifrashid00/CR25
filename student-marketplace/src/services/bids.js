@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getUserById } from './users';
+import { cache } from './cache';
 
 const BIDS_COLLECTION = 'bids';
 

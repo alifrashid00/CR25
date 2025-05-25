@@ -9,7 +9,6 @@ import {
     orderBy, 
     limit,
     updateDoc,
-    deleteDoc,
     serverTimestamp,
     increment,
     startAfter,
@@ -17,7 +16,8 @@ import {
     getCountFromServer
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getUserById } from './users';
+import { getUserById, getUsersByIds } from './users';
+import { cache } from './cache';
 
 const LISTINGS_COLLECTION = 'listings';
 const LISTINGS_PER_PAGE = 12;
@@ -66,6 +66,17 @@ export const createListing = async (listingData, userId) => {
 // Get listings with advanced filtering and pagination
 export const getListings = async (filters = {}, lastDoc = null) => {
     try {
+        // Generate cache key based on filters
+        const cacheKey = `listings_${JSON.stringify(filters)}_${lastDoc ? lastDoc.id : 'first'}`;
+        
+        // Check cache first for non-real-time data
+        if (!filters.realTime) {
+            const cachedData = cache.get(cacheKey);
+            if (cachedData) {
+                return cachedData;
+            }
+        }
+
         let q = collection(db, LISTINGS_COLLECTION);
         
         // Apply filters if they exist
@@ -104,39 +115,50 @@ export const getListings = async (filters = {}, lastDoc = null) => {
             q = query(q, startAfter(lastDoc));
         }
         q = query(q, limit(LISTINGS_PER_PAGE));
+          const querySnapshot = await getDocs(q);
         
-        const querySnapshot = await getDocs(q);
-        const listings = await Promise.all(querySnapshot.docs.map(async doc => {
+        // Extract unique user IDs
+        const userIds = [...new Set(querySnapshot.docs.map(doc => doc.data().userId))];
+        
+        // Batch fetch user data
+        const usersMap = await getUsersByIds(userIds);
+        
+        const listings = querySnapshot.docs.map(doc => {
             const listingData = {
                 id: doc.id,
                 ...doc.data()
             };
             
-            // Fetch user data if not already included
-            if (!listingData.sellerName) {
-                try {
-                    const user = await getUserById(listingData.userId);
-                    listingData.sellerName = user.firstName + ' ' + user.lastName;
-                    listingData.sellerEmail = user.email;
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                    listingData.sellerName = 'Anonymous';
-                }
+            // Add user data from batch fetch
+            const user = usersMap.get(listingData.userId);
+            if (user) {
+                listingData.sellerName = user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.displayName || 'Anonymous';
+                listingData.sellerEmail = user.email || '';
+            } else {
+                listingData.sellerName = 'Anonymous';
+                listingData.sellerEmail = '';
             }
             
             return listingData;
-        }));
-
-        // Get total count for pagination
+        });        // Get total count for pagination
         const countQuery = query(collection(db, LISTINGS_COLLECTION), where('status', '==', 'active'));
         const totalCount = await getCountFromServer(countQuery);
 
-        return {
+        const result = {
             listings,
             lastDoc: querySnapshot.docs[querySnapshot.docs.length - 1],
             hasMore: querySnapshot.docs.length === LISTINGS_PER_PAGE,
             totalCount: totalCount.data().count
         };
+
+        // Cache the result for faster subsequent access
+        if (!filters.realTime) {
+            cache.set(cacheKey, result, 2 * 60 * 1000); // 2 minutes for listings
+        }
+
+        return result;
     } catch (error) {
         console.error('Error getting listings:', error);
         throw error;
@@ -200,6 +222,13 @@ export const subscribeToListings = (filters = {}, callback) => {
 // Get a single listing by ID
 export const getListingById = async (id) => {
     try {
+        // Check cache first
+        const cacheKey = `listing_${id}`;
+        const cached = cache.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+
         const docRef = doc(db, LISTINGS_COLLECTION, id);
         const docSnap = await getDoc(docRef);
         
@@ -216,14 +245,19 @@ export const getListingById = async (id) => {
         if (!listingData.sellerName) {
             try {
                 const user = await getUserById(listingData.userId);
-                listingData.sellerName = user.firstName + ' ' + user.lastName;
-                listingData.sellerEmail = user.email;
+                listingData.sellerName = user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.displayName || 'Anonymous';
+                listingData.sellerEmail = user.email || '';
             } catch (error) {
                 console.error('Error fetching user data:', error);
                 listingData.sellerName = 'Anonymous';
+                listingData.sellerEmail = '';
             }
         }
 
+        // Cache the result
+        cache.set(cacheKey, listingData, 2 * 60 * 1000); // 2 minutes cache
         return listingData;
     } catch (error) {
         console.error('Error getting listing:', error);
@@ -257,6 +291,21 @@ export const deleteListing = async (listingId) => {
         return listingId;
     } catch (error) {
         console.error('Error deleting listing:', error);
+        throw error;
+    }
+};
+
+// Mark a listing as sold
+export const markAsSold = async (listingId) => {
+    try {
+        const docRef = doc(db, LISTINGS_COLLECTION, listingId);
+        await updateDoc(docRef, {
+            status: 'sold',
+            soldAt: serverTimestamp()
+        });
+        return listingId;
+    } catch (error) {
+        console.error('Error marking listing as sold:', error);
         throw error;
     }
 };
