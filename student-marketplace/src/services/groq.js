@@ -1,9 +1,10 @@
 import Groq from "groq-sdk";
+import { config } from "../config/env";
 
-const groq = new Groq({ 
-  apiKey: "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",
+const groq = config.groq.apiKey ? new Groq({ 
+  apiKey: config.groq.apiKey,
   dangerouslyAllowBrowser: true 
-});
+}) : null;
 
 const SYSTEM_PROMPT_INITIAL = `You are a helpful and intelligent shopping assistant for a student marketplace. You have access to the current inventory of items.
 
@@ -50,6 +51,14 @@ IMPORTANT: When providing suggested_items, use ONLY the exact item IDs or exact 
 
 export const getChatbotResponse = async (userMessage, conversationHistory = [], availableListings = []) => {
   try {
+    // Check if GROQ API is available
+    if (!groq) {
+      return {
+        response: "Sorry, the AI chatbot is currently unavailable. Please check if the GROQ API key is configured.",
+        type: "conversation"
+      };
+    }
+
     // Create a summary of available listings for the AI
     const listingsSummary = availableListings.map(listing => ({
       id: listing.id,

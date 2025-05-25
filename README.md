@@ -32,22 +32,48 @@ A full-stack web application for university students to buy, sell, and trade ite
    ```bash
    npm install
    ```
-3. **Set up Firebase:**
-   - Create a Firebase project
-   - Enable Authentication, Firestore, and Storage
-   - Create a `.env` file with your Firebase configuration:
+3. **Set up environment variables:**
+   - Copy the example environment file:
+     ```bash
+     cp .env.example .env
+     ```
+   - Update the `.env` file with your configuration:
      ```env
+     # Firebase Configuration
      VITE_FIREBASE_API_KEY=your_api_key
      VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
      VITE_FIREBASE_PROJECT_ID=your_project_id
      VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
      VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
      VITE_FIREBASE_APP_ID=your_app_id
+     VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+     
+     # GROQ API Configuration (for AI chatbot)
+     VITE_GROQ_API_KEY=your_groq_api_key
+     
+     # University Email Domains (comma-separated)
+     VITE_UNIVERSITY_DOMAINS=your-university.edu,another-university.edu
      ```
-4. **Start the development server:**
+
+4. **Set up Firebase:**
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Enable Authentication, Firestore, and Storage
+   - Copy your Firebase configuration values to the `.env` file
+
+5. **Set up GROQ API (Optional - for AI features):**
+   - Get an API key from [GROQ](https://console.groq.com/)
+   - Add it to your `.env` file as `VITE_GROQ_API_KEY`
+6. **Start the development server:**
    ```bash
    npm run dev
    ```
+
+## Security Notes
+
+- **Never commit your `.env` file** to version control. It contains sensitive API keys.
+- The `.env` file is already included in `.gitignore` to prevent accidental commits.
+- Use `.env.example` as a template for setting up environment variables.
+- Keep your Firebase and GROQ API keys secure and rotate them regularly.
 
 ## Project Structure
 
