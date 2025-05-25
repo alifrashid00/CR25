@@ -74,6 +74,11 @@ const Sidebar = () => {
                         Manage Students
                     </Link>
                 )}
+                {userData?.isCoAdmin && (
+                    <Link to="/approve-posts" className={`nav-item ${isActive('/approve-posts') ? 'active' : ''}`}>
+                        Approve Posts
+                    </Link>
+                )}
             </nav>
             <div className="sidebar-footer">
                 {user && (
