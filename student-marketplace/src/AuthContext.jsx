@@ -9,6 +9,7 @@ import {
     sendEmailVerification
 } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { config } from "./config/env";
 
 const AuthContext = createContext();
 
@@ -18,10 +19,9 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [roleLoading, setRoleLoading] = useState(false);
 
-    const universityDomains = [
-        "iut-dhaka.edu",
-        "du.edu",
-    ];
+    const universityDomains = config.university.domains.length > 0 
+        ? config.university.domains 
+        : ["iut-dhaka.edu", "du.edu"];
 
     function isUniversityEmail(email) {
         return universityDomains.some(domain => email.endsWith(`@${domain}`));

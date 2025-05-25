@@ -7,16 +7,9 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { collection, doc, setDoc } from "firebase/firestore";
+import { config } from "./config/env";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDFxX-eXGr_UJtg5IKx8i0NU8uzMZNLb34",
-    authDomain: "coderush-a742b.firebaseapp.com",
-    projectId: "coderush-a742b",
-    storageBucket: "coderush-a742b.firebasestorage.app",
-    messagingSenderId: "575921249414",
-    appId: "1:575921249414:web:440af03eddc0c406da0507",
-    measurementId: "G-46Y9DJSB5P"
-};
+const firebaseConfig = config.firebase;
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
