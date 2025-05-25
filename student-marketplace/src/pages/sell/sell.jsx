@@ -131,7 +131,7 @@ const Sell = () => {
             const newListing = await createListing(listingData, user.uid);
             
             // Redirect to the new listing
-            navigate(`/listing/${newListing.id}`);
+            navigate(`/listing`);
         } catch (error) {
             console.error('Error creating listing:', error);
             setError(error.message || 'Failed to create listing. Please try again.');

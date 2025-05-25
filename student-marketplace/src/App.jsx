@@ -20,6 +20,7 @@ import EditListing from "./pages/listing/EditListing.jsx";
 import EditService from "./pages/services/EditService.jsx";
 import AdminViewProfile from "./pages/admin/AdminViewProfile.jsx";
 import BidManagement from "./components/BidManagement.jsx";
+import ApprovePosts from "./pages/admin/ApprovePosts.jsx";
 
 // Layout component that includes the sidebar
 const Layout = ({ children }) => {
@@ -189,6 +190,16 @@ function App() {
                         <RoleBasedRoute allowedRoles={["admin"]}>
                             <Layout>
                                 <AdminViewProfile />
+                            </Layout>
+                        </RoleBasedRoute>
+                    }
+                />
+                <Route 
+                    path="/approve-posts" 
+                    element={
+                        <RoleBasedRoute allowedRoles={["student"]}>
+                            <Layout>
+                                <ApprovePosts />
                             </Layout>
                         </RoleBasedRoute>
                     }

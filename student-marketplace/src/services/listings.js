@@ -13,13 +13,16 @@ import {
     increment,
     startAfter,
     onSnapshot,
-    getCountFromServer
+    getCountFromServer,
+    deleteDoc,
+    setDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getUserById, getUsersByIds } from './users';
 import { cache } from './cache';
 
 const LISTINGS_COLLECTION = 'listings';
+const PENDING_COLLECTION = 'pending';
 const LISTINGS_PER_PAGE = 12;
 
 // Create a new listing
@@ -50,15 +53,90 @@ export const createListing = async (listingData, userId) => {
             sellerRating,
             totalRatings,
             createdAt: serverTimestamp(),
-            status: 'active',
+            status: 'pending',
             views: 0,
             likes: 0
         };
 
-        const docRef = await addDoc(collection(db, LISTINGS_COLLECTION), listingWithMetadata);
+        // Add to pending collection
+        const docRef = await addDoc(collection(db, PENDING_COLLECTION), listingWithMetadata);
         return { id: docRef.id, ...listingWithMetadata };
     } catch (error) {
         console.error('Error creating listing:', error);
+        throw error;
+    }
+};
+
+// Get pending listings
+export const getPendingListings = async () => {
+    try {
+        const pendingSnapshot = await getDocs(collection(db, PENDING_COLLECTION));
+        return pendingSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Error getting pending listings:', error);
+        throw error;
+    }
+};
+
+// Approve a pending listing
+export const approveListing = async (listingId, approverId) => {
+    try {
+        // Get the pending listing
+        const pendingDoc = await getDoc(doc(db, PENDING_COLLECTION, listingId));
+        if (!pendingDoc.exists()) {
+            throw new Error('Pending listing not found');
+        }
+
+        const pendingData = pendingDoc.data();
+
+        // Check if the approver is the creator
+        if (pendingData.userId === approverId) {
+            throw new Error('You cannot approve your own listings');
+        }
+
+        // Create the listing in the listings collection
+        await setDoc(doc(db, LISTINGS_COLLECTION, listingId), {
+            ...pendingData,
+            status: 'active',
+            approvedAt: serverTimestamp(),
+            approvedBy: approverId
+        });
+
+        // Delete from pending collection
+        await deleteDoc(doc(db, PENDING_COLLECTION, listingId));
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error approving listing:', error);
+        throw error;
+    }
+};
+
+// Reject a pending listing
+export const rejectListing = async (listingId, rejecterId) => {
+    try {
+        // Get the pending listing
+        const pendingDoc = await getDoc(doc(db, PENDING_COLLECTION, listingId));
+        if (!pendingDoc.exists()) {
+            throw new Error('Pending listing not found');
+        }
+
+        const pendingData = pendingDoc.data();
+
+        // Check if the rejecter is the creator
+        if (pendingData.userId === rejecterId) {
+            throw new Error('You cannot reject your own listings');
+        }
+
+        // Delete from pending collection
+        await deleteDoc(doc(db, PENDING_COLLECTION, listingId));
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error rejecting listing:', error);
         throw error;
     }
 };
