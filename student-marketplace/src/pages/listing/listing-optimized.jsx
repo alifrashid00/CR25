@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getListings } from '../../services/listings';
 import Chatbot from '../../components/Chatbot';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import SkeletonCard from '../../components/SkeletonCard';
 import './listing.css';
 
 const Listing = () => {
@@ -70,18 +68,14 @@ const Listing = () => {
             
             return true;
         });
-    }, [allListings, filters]);    const fetchInitialListings = useCallback(async () => {
+    }, [allListings, filters]);
+
+    const fetchInitialListings = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
             const { listings, lastDoc: newLastDoc, hasMore: moreAvailable } = await getListings({}, null);
-            
-            // Ensure unique listings even on initial fetch
-            const uniqueListings = listings.filter((listing, index, self) => 
-                index === self.findIndex(l => l.id === listing.id)
-            );
-            
-            setAllListings(uniqueListings);
+            setAllListings(listings);
             setLastDoc(newLastDoc);
             setHasMore(moreAvailable);
         } catch (error) {
@@ -90,20 +84,15 @@ const Listing = () => {
         } finally {
             setLoading(false);
         }
-    }, []);const loadMoreListings = useCallback(async () => {
+    }, []);
+
+    const loadMoreListings = useCallback(async () => {
         if (!hasMore || loadingMore) return;
         
         try {
             setLoadingMore(true);
             const { listings, lastDoc: newLastDoc, hasMore: moreAvailable } = await getListings({}, lastDoc);
-            
-            // Prevent duplicate listings by filtering out those that already exist
-            setAllListings(prev => {
-                const existingIds = new Set(prev.map(listing => listing.id));
-                const newListings = listings.filter(listing => !existingIds.has(listing.id));
-                return [...prev, ...newListings];
-            });
-            
+            setAllListings(prev => [...prev, ...listings]);
             setLastDoc(newLastDoc);
             setHasMore(moreAvailable);
         } catch (error) {
@@ -159,9 +148,15 @@ const Listing = () => {
                 return;
             }
             loadMoreListings();
-        };        window.addEventListener('scroll', handleScroll);
+        };
+
+        window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [loadMoreListings, loadingMore]);
+
+    if (loading) {
+        return <div className="loading">Loading listings...</div>;
+    }
 
     return (
         <div className="listings-container">
@@ -197,18 +192,19 @@ const Listing = () => {
                         <span className="suggestions-icon">🤖</span>
                         Showing AI suggested items ({filteredListings.length} found)
                     </div>
-                )}                <div className="listings-grid">
-                    {loading ? (
-                        <SkeletonCard count={8} />
-                    ) : error ? (
+                )}
+
+                <div className="listings-grid">
+                    {error ? (
                         <div className="error-message">{error}</div>
                     ) : filteredListings.length === 0 ? (
                         <div className="no-listings">No listings found matching your criteria</div>
-                    ) : (                        filteredListings.map((listing, index) => {
+                    ) : (
+                        filteredListings.map(listing => {
                             const isSuggested = suggestedItems.includes(listing.id) || suggestedItems.includes(listing.title);
                             return (
                                 <div 
-                                    key={`${listing.id}-${index}`} 
+                                    key={listing.id} 
                                     className={`listing-card ${isSuggested ? 'suggested' : ''}`} 
                                     onClick={() => navigate(`/listing/${listing.id}`)}
                                 >
@@ -237,13 +233,13 @@ const Listing = () => {
                             );
                         })
                     )}
-                </div>{/* Load more button or loading indicator */}
+                </div>
+
+                {/* Load more button or loading indicator */}
                 {hasMore && (
-                    <div className="load-more-container">                        {loadingMore ? (
-                            <LoadingSpinner 
-                                size="medium"
-                                className="load-more-spinner"
-                            />
+                    <div className="load-more-container">
+                        {loadingMore ? (
+                            <div className="loading-more">Loading more...</div>
                         ) : (
                             <button className="load-more-button" onClick={loadMoreListings}>
                                 Load More

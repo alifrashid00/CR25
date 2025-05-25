@@ -24,6 +24,7 @@ html, body, #root {
     min-height: calc(100vh - 100px);
     background-color: #FFFFFF;
     color: #4C4C4C;
+    contain: layout style paint;
 }
 
 /* Header Section */
@@ -81,6 +82,7 @@ html, body, #root {
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 1.5rem;
     padding: 1rem 0;
+    contain: layout;
 }
 
 /* Listing Card */
@@ -92,6 +94,8 @@ html, body, #root {
     transition: all 0.3s ease;
     cursor: pointer;
     border: 1px solid #B0B1B3;
+    transform: translateZ(0); /* Enable hardware acceleration */
+    will-change: transform; /* Optimize for animations */
 }
 
 .listing-card:hover {
@@ -227,6 +231,73 @@ html, body, #root {
 
 .mini-button.sold-button:hover {
     background-color: #047857;
+}
+
+/* Load more functionality */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem 0;
+}
+
+.load-more-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.load-more-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.loading-more {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 16px;
+}
+
+.loading-more::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Skeleton loading for better perceived performance */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+    height: 300px;
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
 
 /* Responsive */
@@ -719,6 +790,8 @@ html, body, #root {
 .ask-expert-button:hover::before {
     opacity: 1;
     transform: translateX(0);
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

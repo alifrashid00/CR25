@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getServices } from '../../services/services';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import SkeletonCard from '../../components/SkeletonCard';
 import './services.css';
 
 const Services = () => {
@@ -106,10 +108,6 @@ const Services = () => {
         setFilters(emptyFilters);
         setFilteredServices(allServices);
     };
-
-    if (loading) {
-        return <div className="loading">Loading services...</div>;
-    }
 
     return (
         <div className="services-container">
@@ -227,7 +225,9 @@ const Services = () => {
                 </div>
 
                 <div className="services-grid">
-                    {error ? (
+                    {loading ? (
+                        <SkeletonCard count={6} />
+                    ) : error ? (
                         <div className="error-message">{error}</div>
                     ) : filteredServices.length === 0 ? (
                         <div className="no-services">No services found matching your criteria</div>

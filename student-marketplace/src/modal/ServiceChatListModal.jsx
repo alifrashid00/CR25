@@ -5,26 +5,26 @@ import { getUsersByIds } from '../services/users';
 import ChatModal from "./ChatModal.jsx";
 import './ChatListModal.css'
 
-const ChatListModal = ({ listing, sellerId, onClose }) => {
-    console.log("ChatListModal props:", { listing, sellerId });
+const ServiceChatListModal = ({ service, providerId, onClose }) => {
+    console.log("ServiceChatListModal props:", { service, providerId });
     const [buyers, setBuyers] = useState([]);
     const [selectedBuyer, setSelectedBuyer] = useState(null);
     const [conversationId, setConversationId] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-         console.log("Triggering useEffect for listing.id:", listing?.id, "sellerId:", sellerId);
+        console.log("Triggering useEffect for service.id:", service?.id, "providerId:", providerId);
         const fetchBuyers = async () => {
-            console.log("Fetching conversations for:", listing.id, sellerId);
+            console.log("Fetching conversations for service:", service.id, providerId);
             setLoading(true);
             const q = query(
                 collection(db, 'conversations'),
-                where('listingId', '==', listing.id),
-                where('sellerId', '==', sellerId)
+                where('serviceId', '==', service.id),
+                where('providerId', '==', providerId)
             );
 
             const snapshot = await getDocs(q);
-            console.log("Fetched conversations:", snapshot.docs.map(doc => doc.data()));
+            console.log("Fetched service conversations:", snapshot.docs.map(doc => doc.data()));
             
             if (snapshot.empty) {
                 setBuyers([]);
@@ -60,10 +60,11 @@ const ChatListModal = ({ listing, sellerId, onClose }) => {
         };
 
         fetchBuyers();
-    }, [listing.id, sellerId]);
+    }, [service.id, providerId]);
+
     useEffect(() => {
-        console.log('Listing ID passed to ChatListModal:', listing?.id);
-    }, [listing]);
+        console.log('Service ID passed to ServiceChatListModal:', service?.id);
+    }, [service]);
 
     const handleOpenChat = (buyer) => {
         setSelectedBuyer(buyer.id);
@@ -74,12 +75,12 @@ const ChatListModal = ({ listing, sellerId, onClose }) => {
         <div className="chat-modal-overlay">
             <div className="chat-modal-container">
                 <button className="chat-close-button" onClick={onClose}>✕</button>
-                <h2 className="text-lg font-bold mb-2">Buyers for: {listing.title}</h2>
+                <h2 className="text-lg font-bold mb-2">Clients for: {service.title}</h2>
 
                 {loading ? (
-                    <p>Loading buyers...</p>
+                    <p>Loading clients...</p>
                 ) : buyers.length === 0 ? (
-                    <p>No buyers have messaged yet.</p>
+                    <p>No clients have messaged yet about this service.</p>
                 ) : (
                     <ul className="chat-list">
                         {buyers.map((buyer) => {
@@ -113,13 +114,12 @@ const ChatListModal = ({ listing, sellerId, onClose }) => {
                             );
                         })}
                     </ul>
-
                 )}
 
                 {conversationId && selectedBuyer && (
                     <ChatModal
                         conversationId={conversationId}
-                        currentUserId={sellerId}
+                        currentUserId={providerId}
                         receiverId={selectedBuyer}
                         onClose={() => {
                             setConversationId(null);
@@ -132,4 +132,4 @@ const ChatListModal = ({ listing, sellerId, onClose }) => {
     );
 };
 
-export default ChatListModal;
+export default ServiceChatListModal;

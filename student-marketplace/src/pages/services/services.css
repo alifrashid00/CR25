@@ -335,7 +335,8 @@
 }
 
 .edit-button,
-.delete-button {
+.delete-button,
+.chat-button {
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
@@ -360,6 +361,15 @@
 
 .delete-button:hover {
     background-color: #d32f2f;
+}
+
+.chat-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.chat-button:hover {
+    background-color: #45a049;
 }
 
 .skill-tag {

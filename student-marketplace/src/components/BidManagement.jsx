@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../AuthContext';
 import { getSellerBids, acceptBid, rejectBid } from '../services/bids';
+import LoadingSpinner from './LoadingSpinner';
 import './BidManagement.css';
 
 const BidManagement = () => {
@@ -86,10 +87,8 @@ const BidManagement = () => {
             case 'rejected': return 'Rejected';
             default: return status;
         }
-    };
-
-    if (loading) {
-        return <div className="bid-management-loading">Loading your bids...</div>;
+    };    if (loading) {
+        return <LoadingSpinner size="large" />;
     }
 
     return (
@@ -131,23 +130,27 @@ const BidManagement = () => {
                                     <div className="bid-date">
                                         <strong>Placed:</strong> {new Date(bid.createdAt?.toDate()).toLocaleString()}
                                     </div>
-                                </div>
-
-                                {bid.status === 'active' && (
+                                </div>                                {bid.status === 'active' && (
                                     <div className="bid-actions">
                                         <button
                                             className="accept-btn"
                                             onClick={() => handleAcceptBid(bid.id, bid.listingId)}
                                             disabled={processingBid === bid.id}
-                                        >
-                                            {processingBid === bid.id ? 'Processing...' : 'Accept Bid'}
+                                        >                                            {processingBid === bid.id ? (
+                                                <LoadingSpinner size="small" />
+                                            ) : (
+                                                'Accept Bid'
+                                            )}
                                         </button>
                                         <button
                                             className="reject-btn"
                                             onClick={() => handleRejectBid(bid.id)}
                                             disabled={processingBid === bid.id}
-                                        >
-                                            {processingBid === bid.id ? 'Processing...' : 'Reject Bid'}
+                                        >                                            {processingBid === bid.id ? (
+                                                <LoadingSpinner size="small" />
+                                            ) : (
+                                                'Reject Bid'
+                                            )}
                                         </button>
                                     </div>
                                 )}

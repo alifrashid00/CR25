@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { getListingById, incrementViewCount, updateSellerRating, deleteListing, markAsSold } from '../../services/listings';
 import { createBid, getListingBids, getHighestBid } from '../../services/bids';
+import { getListingReviews, createReview } from '../../services/reviews';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import './listing-detail.css';
 import MessageButton from "../../components/MessageButton";
 import ExpertChat from "../../components/ExpertChat";
@@ -28,12 +30,6 @@ const ListingDetail = () => {
     const [reviews, setReviews] = useState([]);
     const [loadingReviews, setLoadingReviews] = useState(true);
 
-    useEffect(() => {
-        fetchListing();
-        fetchReviews();
-    }, [id]);
-
-    // const fetchListing = async () => {
     const fetchListing = useCallback(async () => {
         try {
             setLoading(true);
@@ -61,9 +57,22 @@ const ListingDetail = () => {
         }
     }, [id]);
 
+    const fetchReviews = useCallback(async () => {
+        try {
+            setLoadingReviews(true);
+            const reviewsData = await getListingReviews(id);
+            setReviews(reviewsData);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+        } finally {
+            setLoadingReviews(false);
+        }
+    }, [id]);
+
     useEffect(() => {
         fetchListing();
-    }, [fetchListing]);
+        fetchReviews();
+    }, [fetchListing, fetchReviews]);
 
     const handleBidSubmit = async (e) => {
         e.preventDefault();
@@ -104,17 +113,6 @@ const ListingDetail = () => {
             setBidError(error.message);
         } finally {
             setBidLoading(false);
-                    }
-    };
-    const fetchReviews = async () => {
-        try {
-            setLoadingReviews(true);
-            const reviewsData = await getListingReviews(id);
-            setReviews(reviewsData);
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-        } finally {
-            setLoadingReviews(false);
         }
     };
 
@@ -184,7 +182,7 @@ const ListingDetail = () => {
     };
 
     if (loading) {
-        return <div className="loading">Loading listing...</div>;
+        return <LoadingSpinner size="large" />;
     }
 
     if (error) {
@@ -247,7 +245,11 @@ const ListingDetail = () => {
                                             type="submit" 
                                             disabled={bidLoading}
                                         >
-                                            {bidLoading ? 'Placing Bid...' : 'Place Bid'}
+                                            {bidLoading ? (
+                                                <LoadingSpinner size="small" />
+                                            ) : (
+                                                'Place Bid'
+                                            )}
                                         </button>
                                     </div>
                                     {bidError && <p className="bid-error">{bidError}</p>}
@@ -371,7 +373,7 @@ const ListingDetail = () => {
             <div className="reviews-section">
                 <h2>Reviews</h2>
                 {loadingReviews ? (
-                    <div className="loading">Loading reviews...</div>
+                    <LoadingSpinner size="medium" />
                 ) : reviews.length === 0 ? (
                     <div className="no-reviews">No reviews yet</div>
                 ) : (
